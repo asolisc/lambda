@@ -86,6 +86,9 @@ constituents %>% count(action)
 
 Probablemente no tienes la muestra inicial - hacer reverse engineering.
 
+
+`current` debe de corresponder a la muestra más reciente del S&P500. Corroboramos esto viendo los valores únicos para la fecha donde tenemos valores de `current`:
+
 ```{r}
 constituents %>% filter(
   action == "current"
@@ -93,12 +96,42 @@ constituents %>% filter(
 ```
 
 
+Vemos las fechas únicas:
+
 ```{r}
 constituents %>% 
   distinct(date) %>% 
   arrange(date)
 ```
 
+A partir de cuándo empiezan y terminan los `historical`?
+
+```{r}
+constituents %>% 
+  filter(
+    action == "historical"
+  ) %>%
+  distinct(date) %>% 
+  arrange(date)
+```
+
+Cuántos tickers únicos hay por `action`?
+
+```{r}
+constituents %>% count(action, ticker) %>% count(action)
+```
+
+
+A partir de cuándo empiezan y terminan los `historical`?
+
+```{r}
+constituents %>% 
+  filter(
+    action == "historical"
+  ) %>%
+  distinct(date) %>% 
+  arrange(date)
+```
 
 ## Data wrangling
 
