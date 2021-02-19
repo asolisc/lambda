@@ -1,0 +1,99 @@
+---
+title: "Follow-up Problem"
+description: |
+  Solution to Lambda Capital's follow-up problem
+author:
+  - name: Alexis Solis Cancino
+    url: mailto:alexis.solisc@gmail.com
+    # affiliation: ITAM
+date: "`r Sys.Date()`"
+output: 
+  distill::distill_article:
+    toc: true
+    toc_float: true
+    code_folding: true
+    theme: "resources/theme.css"
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+library(tidyverse)
+```
+
+# Introduction
+
+
+## The S&P500 Index
+
+The S&P500 index...
+
+it rebalances every...
+
+## The Strategy
+
+
+## The Price Rate of Change (ROC)
+
+https://www.investopedia.com/terms/p/pricerateofchange.asp
+
+The ROC for 200 days would simply be:
+
+\begin{equation}
+\text{ROC}_{200d} = \left(\dfrac{P_t}{P_{t-200}}-1\right) \times 100
+\end{equation}
+
+
+# Data-based Strategy
+
+
+```{r}
+# Use read_csv() function to read the close data
+close_tbl <- read_csv("data/closes.csv") %>% 
+  select(-1)
+
+close_tbl %>% tail()
+```
+
+Apparently, we have daily closing data from `1997-12-31` through `2021-01-12`.
+
+We also read the `constituents.csv` data.
+
+```{r}
+constituents <- read_csv("data/constituents.csv") %>% 
+  select(-1)
+
+constituents %>% glimpse()
+```
+
+```{r}
+constituents %>% arrange(date)
+```
+
+
+```{r}
+constituents %>% distinct(action)
+```
+
+
+```{r}
+constituents %>% count(action)
+```
+
+
+## Data wrangling
+
+We get the data into a long format (instead of the wide format with `1,085` columns).
+
+```{r}
+close_long <- close_tbl %>% 
+  pivot_longer(cols = -date, names_to = "ticker", values_to = "close") %>% 
+  arrange(ticker, date)
+
+close_long
+```
+
+
+
