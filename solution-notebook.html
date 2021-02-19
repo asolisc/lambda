@@ -1731,26 +1731,30 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span class="va">close_tbl</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">&quot;data/closes.csv&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
 
-<span class="va">close_tbl</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">close_tbl</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 6 x 1,085
-  date         ZTS  ZION  ZBRA   ZBH   YUM   XYL   XRX  XRAY   XOM
-  &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 2021-01-05  165.  43.6  381.  156.  106.  99.6  22.8  55.3  43.5
-2 2021-01-06  167.  48.5  395.  160.  106. 104.   23.2  58.0  44.6
-3 2021-01-07  167   50.0  409.  159.  106. 108.   23.6  57.7  45.0
-4 2021-01-08  168.  48.7  405.  159.  107. 107.   23.6  58.2  45.5
-5 2021-01-11  169.  49.9  414.  159   108. 106.   23.4  58.5  46.8
-6 2021-01-12  166.  50.4  408.  160.  108. 106.   23.2  60.0  47.9
-# ... with 1,075 more variables: XLNX &lt;dbl&gt;, XEL &lt;dbl&gt;, WYNN &lt;dbl&gt;,
-#   WY &lt;dbl&gt;, WU &lt;dbl&gt;, WST &lt;dbl&gt;, WRK &lt;dbl&gt;, WRB &lt;dbl&gt;, WMT &lt;dbl&gt;,
-#   WMB &lt;dbl&gt;, WM &lt;dbl&gt;, WLTW &lt;dbl&gt;, WHR &lt;dbl&gt;, WFC &lt;dbl&gt;,
-#   WELL &lt;dbl&gt;, WEC &lt;dbl&gt;, WDC &lt;dbl&gt;, WBA &lt;dbl&gt;, WAT &lt;dbl&gt;,
-#   WAB &lt;dbl&gt;, VZ &lt;dbl&gt;, VTRS &lt;dbl&gt;, VTR &lt;dbl&gt;, VRTX &lt;dbl&gt;,
-#   VRSN &lt;dbl&gt;, VRSK &lt;dbl&gt;, VNT &lt;dbl&gt;, VNO &lt;dbl&gt;, VMC &lt;dbl&gt;,
-#   VLO &lt;dbl&gt;, VIAC &lt;dbl&gt;, VFC &lt;dbl&gt;, VAR &lt;dbl&gt;, V &lt;dbl&gt;, USB &lt;dbl&gt;,
-#   URI &lt;dbl&gt;, UPS &lt;dbl&gt;, UNP &lt;dbl&gt;, UNM &lt;dbl&gt;, UNH &lt;dbl&gt;,
+<pre><code># A tibble: 5,796 x 1,085
+   date         ZTS  ZION  ZBRA   ZBH   YUM   XYL   XRX  XRAY   XOM
+   &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+ 1 1997-12-31  31.0  45.4  13.2  29.8  7.26  24.2  148. 10.2   30.6
+ 2 1998-01-02  31.0  45.5  13.2  29.8  7.28  24.2  150.  9.92  30.9
+ 3 1998-01-05  31.0  46.4  13.1  29.8  7.06  24.2  152.  9.54  30.6
+ 4 1998-01-06  31.0  45.6  13.1  29.8  6.76  24.2  151.  9.71  29.5
+ 5 1998-01-07  31.0  44.9  13.0  29.8  6.75  24.2  145.  9.54  30.4
+ 6 1998-01-08  31.0  41.5  13    29.8  6.48  24.2  142.  9.48  29.8
+ 7 1998-01-09  31.0  39.6  11.8  29.8  6.5   24.2  137.  9.02  29.1
+ 8 1998-01-12  31.0  40.5  11.8  29.8  6.53  24.2  137.  9     29.4
+ 9 1998-01-13  31.0  40.8  12.3  29.8  6.53  24.2  141.  9.17  30.0
+10 1998-01-14  31.0  42.2  11.6  29.8  6.53  24.2  142.  9.29  30.4
+# ... with 5,786 more rows, and 1,075 more variables: XLNX &lt;dbl&gt;,
+#   XEL &lt;dbl&gt;, WYNN &lt;dbl&gt;, WY &lt;dbl&gt;, WU &lt;dbl&gt;, WST &lt;dbl&gt;, WRK &lt;dbl&gt;,
+#   WRB &lt;dbl&gt;, WMT &lt;dbl&gt;, WMB &lt;dbl&gt;, WM &lt;dbl&gt;, WLTW &lt;dbl&gt;, WHR &lt;dbl&gt;,
+#   WFC &lt;dbl&gt;, WELL &lt;dbl&gt;, WEC &lt;dbl&gt;, WDC &lt;dbl&gt;, WBA &lt;dbl&gt;,
+#   WAT &lt;dbl&gt;, WAB &lt;dbl&gt;, VZ &lt;dbl&gt;, VTRS &lt;dbl&gt;, VTR &lt;dbl&gt;,
+#   VRTX &lt;dbl&gt;, VRSN &lt;dbl&gt;, VRSK &lt;dbl&gt;, VNT &lt;dbl&gt;, VNO &lt;dbl&gt;,
+#   VMC &lt;dbl&gt;, VLO &lt;dbl&gt;, VIAC &lt;dbl&gt;, VFC &lt;dbl&gt;, VAR &lt;dbl&gt;, V &lt;dbl&gt;,
+#   USB &lt;dbl&gt;, URI &lt;dbl&gt;, UPS &lt;dbl&gt;, UNP &lt;dbl&gt;, UNM &lt;dbl&gt;, UNH &lt;dbl&gt;,
 #   ULTA &lt;dbl&gt;, UHS &lt;dbl&gt;, UDR &lt;dbl&gt;, UAL &lt;dbl&gt;, UAA &lt;dbl&gt;, UA &lt;dbl&gt;,
 #   TYL &lt;dbl&gt;, TXT &lt;dbl&gt;, TXN &lt;dbl&gt;, TWTR &lt;dbl&gt;, TTWO &lt;dbl&gt;,
 #   TT &lt;dbl&gt;, TSN &lt;dbl&gt;, TSLA &lt;dbl&gt;, TSCO &lt;dbl&gt;, TRV &lt;dbl&gt;,
@@ -1765,6 +1769,71 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 #   ROL &lt;dbl&gt;, ...</code></pre>
 </div>
 <p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code>.</p>
+<p>We also read the <code>constituents.csv</code> data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">&quot;data/constituents.csv&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
+
+<span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code>Rows: 48,388
+Columns: 7
+$ date         &lt;date&gt; 2020-12-31, 2020-12-31, 2020-12-31, 2020-12...
+$ action       &lt;chr&gt; &quot;historical&quot;, &quot;current&quot;, &quot;historical&quot;, &quot;curr...
+$ ticker       &lt;chr&gt; &quot;ZTS&quot;, &quot;ZTS&quot;, &quot;ZION&quot;, &quot;ZION&quot;, &quot;ZBRA&quot;, &quot;ZBRA&quot;...
+$ name         &lt;chr&gt; &quot;Zoetis Inc&quot;, &quot;Zoetis Inc&quot;, &quot;Zions Bancorpor...
+$ contraticker &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ contraname   &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ note         &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 48,388 x 7
+   date       action  ticker name        contraticker contraname note 
+   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;       &lt;lgl&gt;        &lt;lgl&gt;      &lt;lgl&gt;
+ 1 1957-03-04 added   WWY    Wrigley Wm~ NA           NA         NA   
+ 2 1957-03-04 added   WNDXQ  Winn Dixie~ NA           NA         NA   
+ 3 1957-03-04 added   WLA    Warner Lam~ NA           NA         NA   
+ 4 1957-03-04 added   WGL    Wgl Holdin~ NA           NA         NA   
+ 5 1957-03-04 removed WAB    Westinghou~ NA           NA         NA   
+ 6 1957-03-04 added   VO1    Seagram Co~ NA           NA         NA   
+ 7 1957-03-04 added   USG    Usg Corp    NA           NA         NA   
+ 8 1957-03-04 added   UNP    Union Paci~ NA           NA         NA   
+ 9 1957-03-04 added   UK1    Union Carb~ NA           NA         NA   
+10 1957-03-04 added   UCC1   Union Camp~ NA           NA         NA   
+# ... with 48,378 more rows</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 4 x 1
+  action    
+  &lt;chr&gt;     
+1 historical
+2 current   
+3 added     
+4 removed   </code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 4 x 2
+  action         n
+  &lt;chr&gt;      &lt;int&gt;
+1 added       1137
+2 current      505
+3 historical 46110
+4 removed      636</code></pre>
+</div>
 <h2 id="data-wrangling">Data wrangling</h2>
 <p>We get the data into a long format (instead of the wide format with <code>1,085</code> columns).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1791,7 +1860,42 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 10 1998-01-14 A         44
 # ... with 6,282,854 more rows</code></pre>
 </div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">start_date</span> <span class="op">&lt;-</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2010-01-01&quot;</span><span class="op">)</span>
+<span class="va">end_date</span> <span class="op">&lt;-</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-01-01&quot;</span><span class="op">)</span>
+</code></pre>
+</div>
+</div>
+<p>Delivery:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="fu">tibble</span><span class="op">(</span>
+  date <span class="op">=</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2010-01-01&quot;</span><span class="op">)</span>,
+  nav <span class="op">=</span> <span class="fl">1e6</span>
+<span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1 x 2
+  date           nav
+  &lt;date&gt;       &lt;dbl&gt;
+1 2010-01-01 1000000</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="fu">tibble</span><span class="op">(</span>
+  date <span class="op">=</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2010-01-01&quot;</span><span class="op">)</span>,
+  ticker <span class="op">=</span> <span class="st">&quot;AAPL&quot;</span>,
+  weight <span class="op">=</span> <span class="fl">.5</span>
+<span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1 x 3
+  date       ticker weight
+  &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
+1 2010-01-01 AAPL      0.5</code></pre>
+</div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

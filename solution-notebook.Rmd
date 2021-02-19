@@ -21,6 +21,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T)
 library(tidyverse)
+library(lubridate)
 ```
 
 # Introduction
@@ -54,7 +55,7 @@ The ROC for 200 days would simply be:
 close_tbl <- read_csv("data/closes.csv") %>% 
   select(-1)
 
-close_tbl %>% tail()
+close_tbl
 ```
 
 Apparently, we have daily closing data from `1997-12-31` through `2021-01-12`.
@@ -83,6 +84,22 @@ constituents %>% count(action)
 ```
 
 
+Probablemente no tienes la muestra inicial - hacer reverse engineering.
+
+```{r}
+constituents %>% filter(
+  action == "current"
+) %>% distinct(date)
+```
+
+
+```{r}
+constituents %>% 
+  distinct(date) %>% 
+  arrange(date)
+```
+
+
 ## Data wrangling
 
 We get the data into a long format (instead of the wide format with `1,085` columns).
@@ -96,4 +113,28 @@ close_long
 ```
 
 
+
+```{r}
+start_date <- ymd("2010-01-01")
+end_date <- ymd("2020-01-01")
+```
+
+
+
+Delivery:
+
+```{r}
+tibble(
+  date = ymd("2010-01-01"),
+  nav = 1e6
+)
+```
+
+```{r}
+tibble(
+  date = ymd("2010-01-01"),
+  ticker = "AAPL",
+  weight = .5
+)
+```
 
