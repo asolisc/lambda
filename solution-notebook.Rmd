@@ -47,7 +47,7 @@ The ROC for 200 days would simply be:
 \end{equation}
 
 
-# Data-based Strategy
+# Data comes first
 
 
 ```{r}
@@ -58,30 +58,42 @@ close_tbl <- read_csv("data/closes.csv") %>%
 close_tbl
 ```
 
-Apparently, we have daily closing data from `1997-12-31` through `2021-01-12`.
+Apparently, we have daily closing data from `1997-12-31` through `2021-01-12` for `1,084` different securities.
 
 We also read the `constituents.csv` data.
 
 ```{r}
-constituents <- read_csv("data/constituents.csv") %>% 
+constituents <- read_csv("data/constituents.csv", col_types = "dDcccccc") %>% 
   select(-1)
 
 constituents %>% glimpse()
 ```
 
+
+Let's use the `skimr` package to print a quick summary of missing and unique values of the data:
 ```{r}
-constituents %>% arrange(date)
+constituents %>% 
+  skimr::skim()
+```
+
+We see that the columns `contraticker`, `contraname` and `note` are the only columns that have missing values, which is both logical and acceptable.
+
+
+
+```{r}
+constituents_clean %>% arrange(date)
 ```
 
 
 ```{r}
-constituents %>% distinct(action)
+constituents_clean %>% distinct(action)
 ```
 
 
 ```{r}
-constituents %>% count(action)
+constituents_clean %>% count(action)
 ```
+
 
 
 Probablemente no tienes la muestra inicial - hacer reverse engineering.
