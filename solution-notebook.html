@@ -91,8 +91,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 
   <!--  https://schema.org/Article -->
-  <meta property="article:published" itemprop="datePublished" content="2021-02-19" />
-  <meta property="article:created" itemprop="dateCreated" content="2021-02-19" />
+  <meta property="article:published" itemprop="datePublished" content="2021-02-20" />
+  <meta property="article:created" itemprop="dateCreated" content="2021-02-20" />
   <meta name="article:author" content="Alexis Solis Cancino" />
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
@@ -110,7 +110,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","output","editor_options"]}},"value":[{"type":"character","attributes":{},"value":["Follow-up Problem"]},{"type":"character","attributes":{},"value":["Solution to Lambda Capital's follow-up problem\n"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url"]}},"value":[{"type":"character","attributes":{},"value":["Alexis Solis Cancino"]},{"type":"character","attributes":{},"value":["mailto:alexis.solisc@gmail.com"]}]}]},{"type":"character","attributes":{},"value":["2021-02-19"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","toc_float","code_folding","theme"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["resources/theme.css"]}]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["chunk_output_type"]}},"value":[{"type":"character","attributes":{},"value":["console"]}]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","output","editor_options"]}},"value":[{"type":"character","attributes":{},"value":["Follow-up Problem"]},{"type":"character","attributes":{},"value":["Solution to Lambda Capital's follow-up problem\n"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url"]}},"value":[{"type":"character","attributes":{},"value":["Alexis Solis Cancino"]},{"type":"character","attributes":{},"value":["mailto:alexis.solisc@gmail.com"]}]}]},{"type":"character","attributes":{},"value":["2021-02-20"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["toc","toc_float","code_folding","theme"]}},"value":[{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[true]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["resources/theme.css"]}]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["chunk_output_type"]}},"value":[{"type":"character","attributes":{},"value":["console"]}]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   
@@ -1484,6 +1484,14 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono');
   @import url('https://fonts.googleapis.com/css2?family=Merriweather');
 
+  /*-- Size for third-level title --*/
+  h2 {
+      font-family: 'Merriweather', serif;
+      color: #224888;
+     /* color: #096B72; */
+    }
+
+
   html {
     /*-- Main font sizes --*/
     --title-size:      50px;
@@ -1503,6 +1511,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     --body-font:       "Noto Sans JP", sans-serif;
     --navbar-font:     "Merriweather", sans-serif;
   }
+
 
 
 
@@ -1673,7 +1682,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"Follow-up Problem","description":"Solution to Lambda Capital's follow-up problem","authors":[{"author":"Alexis Solis Cancino","authorURL":"mailto:alexis.solisc@gmail.com","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-02-19T00:00:00.000-06:00","citationText":"Cancino, 2021"}
+{"title":"Follow-up Problem","description":"Solution to Lambda Capital's follow-up problem","authors":[{"author":"Alexis Solis Cancino","authorURL":"mailto:alexis.solisc@gmail.com","affiliation":"&nbsp;","affiliationURL":"#","orcidID":""}],"publishedDate":"2021-02-20T00:00:00.000-06:00","citationText":"Cancino, 2021"}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -1692,7 +1701,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="d-byline">
   Alexis Solis Cancino <a href="mailto:alexis.solisc@gmail.com" class="uri">mailto:alexis.solisc@gmail.com</a> 
   
-<br />2021-02-19
+<br />2021-02-20
 </div>
 
 <div class="d-article">
@@ -1700,31 +1709,451 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <nav class="l-text toc figcaption" id="TOC">
 <h3>Contents</h3>
 <ul>
-<li><a href="#introduction">Introduction</a>
+<li><a href="#introduction">1. Introduction</a>
 <ul>
-<li><a href="#the-sp500-index">The S&amp;P500 Index</a></li>
-<li><a href="#the-strategy">The Strategy</a></li>
-<li><a href="#the-price-rate-of-change-roc">The Price Rate of Change (ROC)</a></li>
+<li><a href="#the-sp500-index">1.1 The S&amp;P500 Index</a></li>
+<li><a href="#the-strategy">1.2 The Strategy</a></li>
+<li><a href="#the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</a></li>
 </ul></li>
-<li><a href="#data-based-strategy">Data-based Strategy</a>
+<li><a href="#data-comes-first">Data comes first</a>
 <ul>
+<li><a href="#constituents-data">Constituents Data</a></li>
 <li><a href="#data-wrangling">Data wrangling</a></li>
 </ul></li>
 </ul>
 </nav>
 </div>
-<h1 id="introduction">Introduction</h1>
-<h2 id="the-sp500-index">The S&amp;P500 Index</h2>
+<h1 id="introduction">1. Introduction</h1>
+<p>The task is to develop a backtest for a strategy that trades constituents of the S&amp;P500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis.</p>
+<p>It’s important to verify that it only selects stocks that are part of the S&amp;P500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.</p>
+<h2 id="the-sp500-index">1.1 The S&amp;P500 Index</h2>
 <p>The S&amp;P500 index…</p>
 <p>it rebalances every…</p>
-<h2 id="the-strategy">The Strategy</h2>
-<h2 id="the-price-rate-of-change-roc">The Price Rate of Change (ROC)</h2>
+<h2 id="the-strategy">1.2 The Strategy</h2>
+<h2 id="the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</h2>
 <p><a href="https://www.investopedia.com/terms/p/pricerateofchange.asp" class="uri">https://www.investopedia.com/terms/p/pricerateofchange.asp</a></p>
 <p>The ROC for 200 days would simply be:</p>
 <p><span class="math display">\[\begin{equation}
 \text{ROC}_{200d} = \left(\dfrac{P_t}{P_{t-200}}-1\right) \times 100
 \end{equation}\]</span></p>
-<h1 id="data-based-strategy">Data-based Strategy</h1>
+<h1 id="data-comes-first">Data comes first</h1>
+<p>We were provided with two datasets: <code>closes.csv</code> and <code>constituents.csv</code>. We will begin by exploring the latter.</p>
+<h2 id="constituents-data">Constituents Data</h2>
+<p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code> for <code>1,084</code> different securities.</p>
+<p>We also read the <code>constituents.csv</code> data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">&quot;data/constituents.csv&quot;</span>, col_types <span class="op">=</span> <span class="st">&quot;dDcccccc&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
+
+<span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code>Rows: 48,388
+Columns: 7
+$ date         &lt;date&gt; 2020-12-31, 2020-12-31, 2020-12-31, 2020-12...
+$ action       &lt;chr&gt; &quot;historical&quot;, &quot;current&quot;, &quot;historical&quot;, &quot;curr...
+$ ticker       &lt;chr&gt; &quot;ZTS&quot;, &quot;ZTS&quot;, &quot;ZION&quot;, &quot;ZION&quot;, &quot;ZBRA&quot;, &quot;ZBRA&quot;...
+$ name         &lt;chr&gt; &quot;Zoetis Inc&quot;, &quot;Zoetis Inc&quot;, &quot;Zions Bancorpor...
+$ contraticker &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ contraname   &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
+</div>
+<p>Let’s use the <code>skimr</code> package to print a quick summary of missing and unique values of the data:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu">skimr</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/skimr/reference/skim.html">skim</a></span><span class="op">(</span><span class="op">)</span>
+</code></pre>
+</div>
+<table>
+<caption><span id="tab:unnamed-chunk-2">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">Piped data</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">48388</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Date</td>
+<td style="text-align: left;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">action</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ticker</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1112</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">name</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1093</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">contraticker</td>
+<td style="text-align: right;">47118</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">927</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">contraname</td>
+<td style="text-align: right;">47118</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">913</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">note</td>
+<td style="text-align: right;">48381</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: Date</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">min</th>
+<th style="text-align: left;">max</th>
+<th style="text-align: left;">median</th>
+<th style="text-align: right;">n_unique</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">date</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">1957-03-04</td>
+<td style="text-align: left;">2020-12-31</td>
+<td style="text-align: left;">2009-06-30</td>
+<td style="text-align: right;">856</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>We see that the columns <code>contraticker</code>, <code>contraname</code> and <code>note</code> are the only columns that have missing values, which is both logical and acceptable.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 48,388 x 7
+   date       action  ticker name      contraticker contraname   note 
+   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;
+ 1 1957-03-04 added   WWY    Wrigley ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 2 1957-03-04 added   WNDXQ  Winn Dix~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 3 1957-03-04 added   WLA    Warner L~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 4 1957-03-04 added   WGL    Wgl Hold~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 5 1957-03-04 removed WAB    Westingh~ GT           Goodyear Ti~ &lt;NA&gt; 
+ 6 1957-03-04 added   VO1    Seagram ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 7 1957-03-04 added   USG    Usg Corp  &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 8 1957-03-04 added   UNP    Union Pa~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 9 1957-03-04 added   UK1    Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+10 1957-03-04 added   UCC1   Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+# ... with 48,378 more rows</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 4 x 1
+  action    
+  &lt;chr&gt;     
+1 historical
+2 current   
+3 added     
+4 removed   </code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 4 x 2
+  action         n
+  &lt;chr&gt;      &lt;int&gt;
+1 added       1137
+2 current      505
+3 historical 46110
+4 removed      636</code></pre>
+</div>
+<p><code>current</code> debe de corresponder a la muestra más reciente del S&amp;P500. Corroboramos esto viendo los valores únicos para la fecha donde tenemos valores de <code>current</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+  <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;current&quot;</span>
+<span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1 x 1
+  date      
+  &lt;date&gt;    
+1 2020-12-31</code></pre>
+</div>
+<p>A partir de cuándo empiezan y terminan los <code>historical</code>?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;historical&quot;</span>
+  <span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">distinct</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 92 x 1
+   date      
+   &lt;date&gt;    
+ 1 1998-03-31
+ 2 1998-06-30
+ 3 1998-09-30
+ 4 1998-12-31
+ 5 1999-03-31
+ 6 1999-06-30
+ 7 1999-09-30
+ 8 1999-12-31
+ 9 2000-03-31
+10 2000-06-30
+# ... with 82 more rows</code></pre>
+</div>
+<p>Y los <code>added</code>?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;added&quot;</span>
+  <span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">distinct</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 787 x 1
+   date      
+   &lt;date&gt;    
+ 1 1957-03-04
+ 2 1963-06-27
+ 3 1963-12-05
+ 4 1964-01-30
+ 5 1964-02-20
+ 6 1964-03-31
+ 7 1964-06-30
+ 8 1964-09-30
+ 9 1965-03-31
+10 1965-12-16
+# ... with 777 more rows</code></pre>
+</div>
+<p>Cuántos tickers únicos hay por <code>action</code>?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span>, <span class="va">ticker</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 4 x 2
+  action         n
+  &lt;chr&gt;      &lt;int&gt;
+1 added       1111
+2 current      505
+3 historical  1070
+4 removed      621</code></pre>
+</div>
+<p>A partir de cuándo empiezan y terminan los <code>historical</code>?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;historical&quot;</span>
+  <span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">distinct</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 92 x 1
+   date      
+   &lt;date&gt;    
+ 1 1998-03-31
+ 2 1998-06-30
+ 3 1998-09-30
+ 4 1998-12-31
+ 5 1999-03-31
+ 6 1999-06-30
+ 7 1999-09-30
+ 8 1999-12-31
+ 9 2000-03-31
+10 2000-06-30
+# ... with 82 more rows</code></pre>
+</div>
+<p>Let’s see the data for the first date <code>1957-03-04</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;1957-03-04&quot;</span><span class="op">)</span>
+  <span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 97 x 7
+   date       action  ticker name      contraticker contraname   note 
+   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;
+ 1 1957-03-04 added   WWY    Wrigley ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 2 1957-03-04 added   WNDXQ  Winn Dix~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 3 1957-03-04 added   WLA    Warner L~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 4 1957-03-04 added   WGL    Wgl Hold~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 5 1957-03-04 removed WAB    Westingh~ GT           Goodyear Ti~ &lt;NA&gt; 
+ 6 1957-03-04 added   VO1    Seagram ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 7 1957-03-04 added   USG    Usg Corp  &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 8 1957-03-04 added   UNP    Union Pa~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+ 9 1957-03-04 added   UK1    Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+10 1957-03-04 added   UCC1   Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
+# ... with 87 more rows</code></pre>
+</div>
+<p>It’s clear that we don’t have the initial S&amp;P500 sample, so we will have to reverse engineer the constituents at each date. Let’s start by the final date <code>2020-12-31</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-12-31&quot;</span><span class="op">)</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1,010 x 7
+   date       action  ticker name        contraticker contraname note 
+   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;
+ 1 2020-12-31 histor~ ZTS    Zoetis Inc  &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 2 2020-12-31 current ZTS    Zoetis Inc  &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 3 2020-12-31 histor~ ZION   Zions Banc~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 4 2020-12-31 current ZION   Zions Banc~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 5 2020-12-31 histor~ ZBRA   Zebra Tech~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 6 2020-12-31 current ZBRA   Zebra Tech~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 7 2020-12-31 histor~ ZBH    Zimmer Bio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 8 2020-12-31 current ZBH    Zimmer Bio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 9 2020-12-31 histor~ YUM    Yum Brands~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+10 2020-12-31 current YUM    Yum Brands~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+# ... with 1,000 more rows</code></pre>
+</div>
+<p>We see that we have sort-of-duplicated rows; we note that one <code>action</code> label corresponds to <code>historical</code> and the other one to <code>current</code>. Let’s check that we actually have the same number per category:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-12-31&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 2 x 2
+  action         n
+  &lt;chr&gt;      &lt;int&gt;
+1 current      505
+2 historical   505</code></pre>
+</div>
+<p>We can focus on the <code>added</code> and <code>removed</code> actions, since it is these values the ones that hold most information regarding the S&amp;P500 constituents. Since we’re reverse engineering the index’s constituents, we’ll create a new variable (<code>reverse_action</code>) that tells us whether we have to add or remove that stock from the constituents. In case the <code>action</code> variable is <code>historical</code> or <code>current</code> we simply assign <code>no action</code>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituent_actions</span> <span class="op">&lt;-</span> <span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>reverse_action <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span><span class="va">action</span> <span class="op">==</span> <span class="st">&quot;added&quot;</span> <span class="op">~</span> <span class="st">&quot;remove&quot;</span>,
+                                    <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;removed&quot;</span> <span class="op">~</span> <span class="st">&quot;add&quot;</span>,
+                                    <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">&quot;no action&quot;</span><span class="op">)</span><span class="op">)</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituent_actions</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">reverse_action</span> <span class="op">!=</span> <span class="st">&quot;no action&quot;</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1,773 x 8
+   date       action ticker name  contraticker contraname note 
+   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;
+ 1 2020-12-21 added  TSLA   Tesl~ AIV          Apartment~ &lt;NA&gt; 
+ 2 2020-12-21 remov~ AIV    Apar~ TSLA         Tesla Inc  &lt;NA&gt; 
+ 3 2020-10-12 added  VNT    Vont~ NBL          Noble Ene~ &lt;NA&gt; 
+ 4 2020-10-12 remov~ NBL    Nobl~ VNT          Vontier C~ &lt;NA&gt; 
+ 5 2020-09-21 added  TER    Tera~ COTY         Coty Inc   &lt;NA&gt; 
+ 6 2020-09-21 remov~ KSS    KOHL~ CTLT         Catalent ~ &lt;NA&gt; 
+ 7 2020-09-21 remov~ HRB    H&amp;R ~ ETSY         Etsy Inc   &lt;NA&gt; 
+ 8 2020-09-21 added  ETSY   Etsy~ HRB          H&amp;R Block~ &lt;NA&gt; 
+ 9 2020-09-21 added  CTLT   Cata~ KSS          KOHLS Corp &lt;NA&gt; 
+10 2020-09-21 remov~ COTY   Coty~ TER          Teradyne ~ &lt;NA&gt; 
+# ... with 1,763 more rows, and 1 more variable: reverse_action &lt;chr&gt;</code></pre>
+</div>
+<h2 id="data-wrangling">Data wrangling</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="co"># Use read_csv() function to read the close data</span>
@@ -1768,97 +2197,16 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 #   SBAC &lt;dbl&gt;, RTX &lt;dbl&gt;, RSG &lt;dbl&gt;, ROST &lt;dbl&gt;, ROP &lt;dbl&gt;,
 #   ROL &lt;dbl&gt;, ...</code></pre>
 </div>
-<p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code>.</p>
-<p>We also read the <code>constituents.csv</code> data.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">&quot;data/constituents.csv&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
-
-<span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">glimpse</span><span class="op">(</span><span class="op">)</span>
-</code></pre>
-</div>
-<pre><code>Rows: 48,388
-Columns: 7
-$ date         &lt;date&gt; 2020-12-31, 2020-12-31, 2020-12-31, 2020-12...
-$ action       &lt;chr&gt; &quot;historical&quot;, &quot;current&quot;, &quot;historical&quot;, &quot;curr...
-$ ticker       &lt;chr&gt; &quot;ZTS&quot;, &quot;ZTS&quot;, &quot;ZION&quot;, &quot;ZION&quot;, &quot;ZBRA&quot;, &quot;ZBRA&quot;...
-$ name         &lt;chr&gt; &quot;Zoetis Inc&quot;, &quot;Zoetis Inc&quot;, &quot;Zions Bancorpor...
-$ contraticker &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-$ contraname   &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-$ note         &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 48,388 x 7
-   date       action  ticker name        contraticker contraname note 
-   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;       &lt;lgl&gt;        &lt;lgl&gt;      &lt;lgl&gt;
- 1 1957-03-04 added   WWY    Wrigley Wm~ NA           NA         NA   
- 2 1957-03-04 added   WNDXQ  Winn Dixie~ NA           NA         NA   
- 3 1957-03-04 added   WLA    Warner Lam~ NA           NA         NA   
- 4 1957-03-04 added   WGL    Wgl Holdin~ NA           NA         NA   
- 5 1957-03-04 removed WAB    Westinghou~ NA           NA         NA   
- 6 1957-03-04 added   VO1    Seagram Co~ NA           NA         NA   
- 7 1957-03-04 added   USG    Usg Corp    NA           NA         NA   
- 8 1957-03-04 added   UNP    Union Paci~ NA           NA         NA   
- 9 1957-03-04 added   UK1    Union Carb~ NA           NA         NA   
-10 1957-03-04 added   UCC1   Union Camp~ NA           NA         NA   
-# ... with 48,378 more rows</code></pre>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 4 x 1
-  action    
-  &lt;chr&gt;     
-1 historical
-2 current   
-3 added     
-4 removed   </code></pre>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 4 x 2
-  action         n
-  &lt;chr&gt;      &lt;int&gt;
-1 added       1137
-2 current      505
-3 historical 46110
-4 removed      636</code></pre>
-</div>
-<h2 id="data-wrangling">Data wrangling</h2>
 <p>We get the data into a long format (instead of the wide format with <code>1,085</code> columns).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">close_long</span> <span class="op">&lt;-</span> <span class="va">close_tbl</span> <span class="op">%&gt;%</span> 
-  <span class="fu">pivot_longer</span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">date</span>, names_to <span class="op">=</span> <span class="st">&quot;ticker&quot;</span>, values_to <span class="op">=</span> <span class="st">&quot;close&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">arrange</span><span class="op">(</span><span class="va">ticker</span>, <span class="va">date</span><span class="op">)</span>
-
-<span class="va">close_long</span>
+<pre><code><span class="co"># close_long &lt;- close_tbl %&gt;% </span>
+<span class="co">#   pivot_longer(cols = -date, names_to = &quot;ticker&quot;, values_to = &quot;close&quot;) %&gt;% </span>
+<span class="co">#   arrange(ticker, date)</span>
+<span class="co"># </span>
+<span class="co"># close_long</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 6,282,864 x 3
-   date       ticker close
-   &lt;date&gt;     &lt;chr&gt;  &lt;dbl&gt;
- 1 1997-12-31 A         44
- 2 1998-01-02 A         44
- 3 1998-01-05 A         44
- 4 1998-01-06 A         44
- 5 1998-01-07 A         44
- 6 1998-01-08 A         44
- 7 1998-01-09 A         44
- 8 1998-01-12 A         44
- 9 1998-01-13 A         44
-10 1998-01-14 A         44
-# ... with 6,282,854 more rows</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -1895,7 +2243,7 @@ $ note         &lt;lgl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
 1 2010-01-01 AAPL      0.5</code></pre>
 </div>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
