@@ -74,9 +74,10 @@ We import the `constituents.csv` data.
 
 ```{r}
 constituents <- read_csv("data/constituents.csv", col_types = "dDcccccc") %>% 
+  # Remove first column, which has the index
   select(-1)
 
-constituents %>% glimpse()
+constituents
 ```
 
 
@@ -122,7 +123,7 @@ constituents %>%
 Indeed this is the case. We can see, for example, on the first row: TSLA is being added and replaced by AIV. On the next row we see the opposite operation: AIV is being removed and substituted by TSLA.
 
 
-* Another important check we must do is that there are no errors in the ticker, name relationship. That is, for every (ticker, name) pair there must be just one count per value-key pair.
+* Another important check we must do is that there are no errors in the ticker-name relationship. That is, for every (ticker, name) pair there must be just one count per value-key pair.
 
 We first get the count for each key-value pair:
 
@@ -130,7 +131,7 @@ We first get the count for each key-value pair:
 constituents %>% distinct(ticker, name) %>% count(ticker, name, name = "count")
 ```
 
-Now we filter the counts that are great or equal to 2:
+Now we filter the counts that are greater than 1:
 
 ```{r}
 constituents %>% 
@@ -142,7 +143,7 @@ constituents %>%
 We get no rows, which means that the data is correct.
 
 
-### 2.1.1 The time series of S&P500 constituents
+### 2.1.1 Time variables and `action` in the `constituents` dataset
 
 In this section we'll create a time series that will contain, for each date, the constituents of the S&P500 index. We'll start by focusing on the `action` column.
 
@@ -158,6 +159,36 @@ Since we are focusing on time, we'll add some time-related variables, such as:
 -   `wday_label`: The three-letter label for day of the week as an ordered categorical variable. It begins with `Mon` and ends with `Sun`.
 -   `qday`: The day of the quarter.
 -   `yday`: The day of the year.
+-   `qid`: The quarter's ID.
+
+All variables will have the `date_` prefix so they are easy to identify. Since we can use this creation of variables for later, we create the `add_ts_signature` function (so we can _recycle_ the code).
+
+```{r}
+add_ts_signature <- function(df, .date_col) {
+  df %>% 
+    # Create time series signature
+    mutate(
+      date_year        = year({{.date_col}}),
+      date_half        = semester({{.date_col}}, with_year = FALSE),
+      date_quarter     = quarter({{.date_col}}),
+      date_month       = month({{.date_col}}),
+      date_month_label = month({{.date_col}}, label = TRUE),
+      date_day         = day({{.date_col}}),
+      date_wday        = wday({{.date_col}}, week_start = 1),
+      date_wday_label  = wday({{.date_col}}, label = TRUE),
+      date_qday        = qday({{.date_col}}),
+      date_yday        = yday({{.date_col}}),
+      date_qid         = str_c(date_quarter,"Q", str_sub(date_year, 3L)) %>% as_factor()
+    )
+}
+```
+
+```{r}
+constituents_ts <- constituents %>% 
+  add_ts_signature(.date_col = date)
+```
+
+
 
 ```{r}
 constituents_ts <- constituents %>% 
@@ -173,8 +204,10 @@ constituents_ts <- constituents %>%
     date_wday        = wday(date, week_start = 1),
     date_wday_label  = wday(date, label = TRUE),
     date_qday        = qday(date),
-    date_yday        = yday(date)
+    date_yday        = yday(date),
+    date_qid         = str_c(date_quarter,"Q", str_sub(date_year, 3L)) %>% as_factor()
   )
+
 ```
 
 How are `actions` distributed along the data?
@@ -194,20 +227,6 @@ constituents_ts %>% filter(
 Indeed, the only date where a _current_ value appears is `r constituents_ts %>% filter(action == "current") %>% distinct(date)`
 
 
-Next, we pivot the data to a _wide_ format so we can clearly see the difference between each `action` value. By doing this, we can have a single column for each of the 4 unique values in the `action` variable.
-
-```{r}
-constituents_wide <- constituents_ts %>% 
-  pivot_wider(
-    names_from = action,
-    values_from = name
-    ) %>% 
-  relocate(historical, current, added, removed, .after = ticker)
-
-constituents_wide
-```
-
-
 Let's inspect the data for the first date `1957-03-04`:
 
 ```{r}
@@ -217,7 +236,7 @@ constituents_wide %>%
   )
 ```
 
-It's clear that we don't have the initial S&P500 sample, so we will have to reverse engineer the constituents at each date. Let's start by the final date `2020-12-31`:
+It's clear that we don't have the initial S&P500 sample, but we **could** reverse engineer the constituents at each date. Let's start by the final date `2020-12-31`:
 
 ```{r}
 constituents %>% 
@@ -233,8 +252,20 @@ constituents %>%
   count(action)
 ```
 
+In order to get a better sense of what's going on with the `action` column, we pivot the data to a _wide_ format so we can clearly see the difference between each `action` value. By doing this, we can have a single column for each of the 4 unique values in the `action` variable.
 
-Inspecting the data, it appears that the `historical` variable gives us the constituents at each quarter. This is backed by the fact that on the latest available date, we have the `current` constituents which correspond to the 4Q20. However, we have the exact same rows bu with a `historical` label. 
+```{r}
+constituents_wide <- constituents_ts %>% 
+  pivot_wider(
+    names_from = action,
+    values_from = name
+    ) %>% 
+  relocate(historical, current, added, removed, .after = ticker)
+
+constituents_wide
+```
+
+Inspecting the data, it appears that the `historical` variable gives us the constituents at each quarter. This is backed by the fact that on the latest available date, we have the `current` constituents which correspond to the 4Q20. However, as mentioned above, we have the exact same rows but with a `historical` label.
 
 Let's inspect the dates on which there are no missing values for the `historical` action. We can check the unique values for the month number:
 
@@ -247,100 +278,135 @@ constituents_wide %>%
 
 Indeed, the only months were `historical` actions are not missing are _mod 3_ months (i.e. the end of each quarter).
 
-
-
-
-
-
-
-
-
-
-A partir de cuándo empiezan y terminan los `historical`?
+This points to the fact that probably the `historical` value indicates the constituents per quarter on the S&P500. We can further check the amount of `historical` values per quarter. The number should be around 500, of course.
 
 ```{r}
-constituents %>% 
+constituents_wide %>% 
+  select(date_year, date_quarter, historical) %>% 
+  filter(date_year > 2000) %>% 
+  group_by(date_year, date_quarter) %>%  
+  nest() %>% print(n = 80)
+```
+
+```{r}
+constituents_ts %>% 
+  group_by(date_qid) %>%
+  arrange(date_year, date_quarter) %>% 
   filter(
-    action == "historical"
-  ) %>%
-  distinct(date) %>% 
+    action == "historical",
+    date_year > 2009
+    ) %>% 
+  count(action) %>% 
+  arrange(n) %>% 
+  print(n = 20)
+```
+
+Indeed the number is very close to 500 among all quarters.
+
+One last check we can perform before we can use the `historical` rows as our constituents has to do with the `current` rows. We can reverse engineer the 3Q20 constituents by starting from the 4Q20 (the _current_ constituents).
+
+
+We can first see what the changes on constituents were between the 3Q20 and 4Q20. We can separate the adds and drops into two data frames, like so:
+
+```{r}
+adds_drops <- constituents_wide %>% 
+  filter(!is.na(added) | !is.na(removed) , date_qid %in% c("4Q20")) %>% 
+  select(date, ticker, added, removed, date_qid)
+
+adds_drops %>% 
+  filter(!is.na(added)) %>% 
+  select(-removed)
+
+adds_drops %>% 
+  filter(!is.na(removed)) %>% 
+  select(-added)
+```
+
+
+We can now do the reverse action for the adds and the drops, respectively. Thus, the drops from 3Q20-4Q20 will become our adds and the adds will become our drops.
+
+We start by getting the adds needed to go from 4Q20 to 3Q20:
+
+```{r}
+# Extract the adds from 4Q20 to 3Q20
+adds_3Q <- adds_drops %>% 
+  filter(!is.na(removed)) %>% 
+  pull(removed)
+
+adds_3Q
+```
+
+Next, we get the drops needed to go from 4Q20 to 3Q20:
+
+```{r}
+# Extract the drops from 4Q20 to 3Q20
+drops_3Q <- adds_drops %>% 
+  filter(!is.na(added)) %>% 
+  pull(added)
+```
+
+
+Finally, we get the constituents in 4Q20, include the adds and remove the drops, and compare against the constituents in 3Q20. We should get the same result.
+
+```{r}
+# Get all the constituents for 4Q20
+constituents_4Q20 <- constituents_wide %>% 
+  filter(date_qid == "4Q20", !is.na(historical)) %>% 
+  pull(historical) %>% sort()
+
+# Get all the constituents for 3Q20
+constituents_3Q20 <- constituents_wide %>% 
+  filter(date_qid == "3Q20", !is.na(historical)) %>% 
+  pull(historical) %>% sort()
+
+# include the adds from 4Q20
+calculated_3Q20 <- c(constituents_4Q20, adds_3Q)
+
+# remove the drops from 4Q20
+calculated_3Q20 <- calculated_3Q20[!calculated_3Q20 %in% drops_3Q] %>% sort()
+
+# Check if both results are equal
+all.equal(constituents_3Q20, calculated_3Q20)
+```
+
+### 2.1.2 The time series of S&P500 constituents
+We did get a `TRUE` value when comparing the reverse-engineered approach and the mere `historical` values. We will now proceed to use these `historical` values for every day in the `closes.csv` dataset from `2010-01-01` through `2020-01-01`.
+
+
+```{r}
+# Get the required dates from the closes.csv file
+required_dates <- read_csv(file = "data/closes.csv") %>% 
+  # Focus on the date only
+  select(date) %>% 
+  mutate(date_year = year(date)) %>% 
+  
+  # Focus on 2010 or later
+  filter(date_year > 2009)
+```
+
+We now nest a data frame for each date in the `constituents` dataset that contains the S&P 500 constituents.
+
+```{r}
+constituents_nested <- constituents_wide %>% 
+  # Focus on just the historicals and 2010 or later
+  filter(date_year > 2009, !is.na(historical)) %>% 
+  select(date, ticker, historical, starts_with("date")) %>% 
+  nest(constituents = c(ticker, historical)) %>% 
+  relocate(constituents, .after = 1) %>% 
   arrange(date)
 ```
 
-Y los `added`?
+We can now left_join the datasets:
 
 ```{r}
-constituents %>% 
-  filter(
-    action == "added"
-  ) %>%
-  distinct(date) %>% 
-  arrange(date)
+required_dates %>% 
+  left_join(constituents_nested) %>% 
+  fill(constituents, starts_with("date"), .direction = "up")
 ```
 
 
 
 
-
-
-
-
-Cuántos tickers únicos hay por `action`?
-
-```{r}
-constituents %>% count(action, ticker) %>% count(action)
-```
-
-
-A partir de cuándo empiezan y terminan los `historical`?
-
-```{r}
-constituents %>% 
-  filter(
-    action == "historical"
-  ) %>%
-  distinct(date) %>% 
-  arrange(date)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-constituents %>% 
-  group_by(date) %>% 
-  count(action)
-```
-
-We can focus on the `added` and `removed` actions, since it is these values the ones that hold most information regarding the S&P500 constituents. Since we're reverse engineering the index's constituents, we'll create a new variable (`reverse_action`) that tells us whether we have to add or remove that stock from the constituents. In case the `action` variable is `historical` or `current` we simply assign `no action`.
-
-```{r}
-constituent_actions <- constituents %>% 
-  mutate(reverse_action = case_when(action == "added" ~ "remove",
-                                    action == "removed" ~ "add",
-                                    TRUE ~ "no action"))
-```
-
-
-```{r}
-constituent_actions %>% 
-  filter(reverse_action != "no action") %>%
-  count(reverse_action)
-```
-
-
-
-
-filtrar sólo 2020
-historical en teoría 
 
 
 
