@@ -23,7 +23,19 @@ knitr::opts_chunk$set(echo = T)
 library(tidyverse)
 library(lubridate)
 library(glue)
+library(skimr)
 ```
+
+
+### Foreword on Reproducibility
+
+In order to run this code, you need to have installed R, RStudio, and install the following packages:
+
+```{r, eval=FALSE}
+# NOT RUN
+# install.packages(c("tidyverse", "lubridate", "glue", "skimr))
+```
+
 
 # 1. Introduction
 

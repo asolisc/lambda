@@ -1701,6 +1701,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <nav class="l-text toc figcaption" id="TOC">
 <h3>Contents</h3>
 <ul>
+<li><a href="#foreword-on-reproducibility">Foreword on Reproducibility</a></li>
 <li><a href="#introduction">1. Introduction</a>
 <ul>
 <li><a href="#the-sp500-index">1.1 The S&amp;P500 Index</a></li>
@@ -1717,6 +1718,15 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </ul></li>
 </ul>
 </nav>
+</div>
+<h3 id="foreword-on-reproducibility">Foreword on Reproducibility</h3>
+<p>In order to run this code, you need to have installed R, RStudio, and install the following packages:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="co"># NOT RUN</span>
+<span class="co"># install.packages(c(&quot;tidyverse&quot;, &quot;lubridate&quot;, &quot;glue&quot;, &quot;skimr))</span>
+</code></pre>
+</div>
 </div>
 <h1 id="introduction">1. Introduction</h1>
 <p>The task is to develop a backtest for a strategy that trades constituents of the S&amp;P500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis.</p>
@@ -1745,13 +1755,13 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 <pre><code>Rows: 48,388
 Columns: 7
-$ date         [3m[90m&lt;date&gt;[39m[23m 2020-12-31, 2020-12-31, 2020-12-31, 2020-12...
-$ action       [3m[90m&lt;chr&gt;[39m[23m &quot;historical&quot;, &quot;current&quot;, &quot;historical&quot;, &quot;curr...
-$ ticker       [3m[90m&lt;chr&gt;[39m[23m &quot;ZTS&quot;, &quot;ZTS&quot;, &quot;ZION&quot;, &quot;ZION&quot;, &quot;ZBRA&quot;, &quot;ZBRA&quot;...
-$ name         [3m[90m&lt;chr&gt;[39m[23m &quot;Zoetis Inc&quot;, &quot;Zoetis Inc&quot;, &quot;Zions Bancorpor...
-$ contraticker [3m[90m&lt;chr&gt;[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-$ contraname   [3m[90m&lt;chr&gt;[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-$ note         [3m[90m&lt;chr&gt;[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
+$ date         &lt;date&gt; 2020-12-31, 2020-12-31, 2020-12-31, 2020-12...
+$ action       &lt;chr&gt; &quot;historical&quot;, &quot;current&quot;, &quot;historical&quot;, &quot;curr...
+$ ticker       &lt;chr&gt; &quot;ZTS&quot;, &quot;ZTS&quot;, &quot;ZION&quot;, &quot;ZION&quot;, &quot;ZBRA&quot;, &quot;ZBRA&quot;...
+$ name         &lt;chr&gt; &quot;Zoetis Inc&quot;, &quot;Zoetis Inc&quot;, &quot;Zions Bancorpor...
+$ contraticker &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ contraname   &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
 </div>
 <p>Let’s use the <code>skimr</code> package to print a quick summary of missing and unique values of the data:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1761,7 +1771,7 @@ $ note         [3m[90m&lt;chr&gt;[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA
 </code></pre>
 </div>
 <table>
-<caption><span id="tab:unnamed-chunk-2">Table 1: </span>Data summary</caption>
+<caption><span id="tab:unnamed-chunk-3">Table 1: </span>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Name</td>
