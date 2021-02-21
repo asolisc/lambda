@@ -22,6 +22,7 @@ editor_options:
 knitr::opts_chunk$set(echo = T)
 library(tidyverse)
 library(lubridate)
+library(glue)
 ```
 
 # 1. Introduction
@@ -39,27 +40,25 @@ it rebalances every...
 
 ## 1.2 The Strategy
 
+The strategy consists of selecting the 10 stocks with the highest [Price Rate of Change Indicator (ROC)](https://www.investopedia.com/terms/p/pricerateofchange.asp) and buys them on an equally-weighted basis. Each day before the market opens, we look back on the Price ROCs of the previous close and buy the 10 stocks with the highest ROC.
 
 ## 1.3 The Price Rate of Change (ROC)
 
-https://www.investopedia.com/terms/p/pricerateofchange.asp
-
-The ROC for 200 days would simply be:
+The Price ROC for 200 days is calculated as:
 
 \begin{equation}
 \text{ROC}_{200d} = \left(\dfrac{P_t}{P_{t-200}}-1\right) \times 100
 \end{equation}
 
 
-# Data comes first
+# 2. Data comes first
 
 We were provided with two datasets: `closes.csv` and `constituents.csv`. We will begin by exploring the latter.
 
-## Constituents Data
+## 2.1 Constituents Data EDA
 
-Apparently, we have daily closing data from `1997-12-31` through `2021-01-12` for `1,084` different securities.
 
-We also read the `constituents.csv` data.
+We import the `constituents.csv` data.
 
 ```{r}
 constituents <- read_csv("data/constituents.csv", col_types = "dDcccccc") %>% 
@@ -76,33 +75,172 @@ constituents %>%
   skimr::skim()
 ```
 
-We see that the columns `contraticker`, `contraname` and `note` are the only columns that have missing values, which is both logical and acceptable.
+Some notes on the table above:
 
+1. The dataset consists of 6 character-type variables and 1 date-type variable.
 
-
-```{r}
-constituents %>% arrange(date)
-```
-
+2. According to the table above, there are 4 unique values for the `action` variable. Let's see what are those:
 
 ```{r}
 constituents %>% distinct(action)
 ```
 
+3. The data goes from `r min(constituents$date)` through `r max(constituents$date)` but we don't have daily data since there are only `r unique(constituents$date) %>% length()` unique dates.
+
+
+4.  The columns `contraticker`, `contraname` and `note` are the only columns that have missing values, which is both logical and acceptable.
+
+5. The `contraticker` and `contraname` columns see to be the opposite of the stocks that are added/removed to the index. Let's check that with some steps:
+
+* Check all possible different `action` values when there are no missing values of either the `contraticker` or `contraname` variables.
 
 ```{r}
-constituents %>% count(action)
+constituents %>% 
+  filter(!is.na(contraticker) | !is.na(contraname)) %>% 
+  distinct(action)
 ```
 
-
-
-`current` debe de corresponder a la muestra más reciente del S&P500. Corroboramos esto viendo los valores únicos para la fecha donde tenemos valores de `current`:
+* Inspect some rows where there are no missing values of either the `contraticker` or `contraname` variables.
 
 ```{r}
-constituents %>% filter(
+constituents %>% 
+  filter(!is.na(contraticker) | !is.na(contraname)) 
+```
+
+Indeed this is the case. We can see, for example, on the first row: TSLA is being added and replaced by AIV. On the next row we see the oppositve operation: AIV is being removed and substituted by TSLA.
+
+
+* Another important check we must do is that there are no errors in the ticker, name relationship. That is, for every (ticker, name) pair there must be just one count per value-key pair.
+
+We first get the count for each key-value pair:
+
+```{r}
+constituents %>% distinct(ticker, name) %>% count(ticker, name, name = "count")
+```
+
+Now we filter the counts that are great or equal to 2:
+
+```{r}
+constituents %>% 
+  distinct(ticker, name) %>% 
+  count(ticker, name, name = "count") %>% 
+  filter(count > 1)
+```
+
+We get no rows, which means that the data is correct.
+
+
+### 2.1.1 The time series of S&P500 constituents
+
+In this section we'll create a time series that will contain, for each date, the constituents of the S&P500 index. We'll start by focusing on the `action` column.
+
+Since we are focusing on time, we'll add some time-related variables, such as:
+
+-   `year`: The year of the *time series* `date`.
+-   `half`: The *half component* of the index (i.e. to which semester does the date belong to).
+-   `quarter`: The *quarter component* of the index (i.e. to which quarter does the date belong to).
+-   `month`: The *month component* of the index (with base 1 - that is, January = 1 and so on).
+-   `month_label`: The three-letter month label as an ordered categorical variable. It begins with *Jan* and ends with *Dec*.
+-   `day`: The *day* component of the `date`.
+-   `wday`: The day of the week with base 1. Monday = 1 and Sunday = 7.
+-   `wday_label`: The three-letter label for day of the week as an ordered categorical variable. It begins with `Mon` and ends with `Sun`.
+-   `qday`: The day of the quarter.
+-   `yday`: The day of the year.
+
+```{r}
+constituents_ts <- constituents %>% 
+  
+  # Create time series signature
+  mutate(
+    date_year        = year(date),
+    date_half        = semester(date, with_year = FALSE),
+    date_quarter     = quarter(date),
+    date_month       = month(date),
+    date_month_label = month(date, label = TRUE),
+    date_day         = day(date),
+    date_wday        = wday(date, week_start = 1),
+    date_wday_label  = wday(date, label = TRUE),
+    date_qday        = qday(date),
+    date_yday        = yday(date)
+  )
+```
+
+How are `actions` distributed along the data?
+
+```{r}
+constituents_ts %>% count(action)
+```
+
+`current` appears to correspond to the index's most recent constituents. We can check if this is the case by taking the unique values for the `date` variable when the `action` variable has the _current_ value.
+
+```{r}
+constituents_ts %>% filter(
   action == "current"
 ) %>% distinct(date)
 ```
+
+Indeed, the only date where a _current_ value appears is `r constituents_ts %>% filter(action == "current") %>% distinct(date)`
+
+
+Next, we pivot the data to a _wide_ format so we can clearly see the difference between each `action` value. By doing this, we can have a single column for each of the 4 unique values in the `action` variable.
+
+```{r}
+constituents_wide <- constituents_ts %>% 
+  pivot_wider(
+    names_from = action,
+    values_from = name
+    ) %>% 
+  relocate(historical, current, added, removed, .after = ticker)
+
+constituents_wide
+```
+
+
+Let's inspect the data for the first date `1957-03-04`:
+
+```{r}
+constituents_wide %>% 
+  filter(
+    date == ymd("1957-03-04")
+  )
+```
+
+It's clear that we don't have the initial S&P500 sample, so we will have to reverse engineer the constituents at each date. Let's start by the final date `2020-12-31`:
+
+```{r}
+constituents %>% 
+  filter(date == ymd("2020-12-31"))
+```
+
+
+We see that we have sort-of-duplicated rows; we note that one `action` label corresponds to `historical` and the other one to `current`. Let's check that we actually have the same number per category:
+
+```{r}
+constituents %>% 
+  filter(date == ymd("2020-12-31")) %>% 
+  count(action)
+```
+
+
+Inspecting the data, it appears that the `historical` variable gives us the constituents at each quarter. This is backed by the fact that on the latest available date, we have the `current` constituents which correspond to the 4Q20. However, we have the exact same rows bu with a `historical` label. 
+
+Let's inspect the dates on which there are no missing values for the `historical` action.
+
+```{r}
+constituents_wide %>% 
+  filter(!is.na(historical))
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 A partir de cuándo empiezan y terminan los `historical`?
@@ -160,31 +298,14 @@ constituents %>%
 
 
 
-Let's see the data for the first date `1957-03-04`:
+
+
 
 ```{r}
 constituents %>% 
-  filter(
-    date == ymd("1957-03-04")
-  )
-```
-
-It's clear that we don't have the initial S&P500 sample, so we will have to reverse engineer the constituents at each date. Let's start by the final date `2020-12-31`:
-
-```{r}
-constituents %>% 
-  filter(date == ymd("2020-12-31"))
-```
-
-
-We see that we have sort-of-duplicated rows; we note that one `action` label corresponds to `historical` and the other one to `current`. Let's check that we actually have the same number per category:
-
-```{r}
-constituents %>% 
-  filter(date == ymd("2020-12-31")) %>% 
+  group_by(date) %>% 
   count(action)
 ```
-
 
 We can focus on the `added` and `removed` actions, since it is these values the ones that hold most information regarding the S&P500 constituents. Since we're reverse engineering the index's constituents, we'll create a new variable (`reverse_action`) that tells us whether we have to add or remove that stock from the constituents. In case the `action` variable is `historical` or `current` we simply assign `no action`.
 
@@ -198,12 +319,15 @@ constituent_actions <- constituents %>%
 
 ```{r}
 constituent_actions %>% 
-  filter(reverse_action != "no action")
+  filter(reverse_action != "no action") %>%
+  count(reverse_action)
 ```
 
 
 
 
+filtrar sólo 2020
+historical en teoría 
 
 
 
@@ -219,7 +343,6 @@ constituent_actions %>%
 
 ## Data wrangling
 
-
 ```{r}
 # Use read_csv() function to read the close data
 close_tbl <- read_csv("data/closes.csv") %>% 
@@ -227,6 +350,25 @@ close_tbl <- read_csv("data/closes.csv") %>%
 
 close_tbl
 ```
+
+Apparently, we have daily closing data from `1997-12-31` through `2021-01-12` for `1,084` different securities.
+
+```{r}
+# roc_close <- close_tbl %>% 
+#   mutate(
+#     across(
+#       .cols = -date, 
+#       .fns = ~ (.x / lag(.x, n = 200L)) - 1,
+#       .names = "ROC_{.col}"
+#       )
+#     )
+```
+
+
+```{r}
+# close_tbl %>% skimr::skim_without_charts()
+```
+
 
 We get the data into a long format (instead of the wide format with `1,085` columns).
 

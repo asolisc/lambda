@@ -1484,14 +1484,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono');
   @import url('https://fonts.googleapis.com/css2?family=Merriweather');
 
-  /*-- Size for third-level title --*/
-  h2 {
-      font-family: 'Merriweather', serif;
-      color: #224888;
-     /* color: #096B72; */
-    }
-
-
   html {
     /*-- Main font sizes --*/
     --title-size:      50px;
@@ -1715,9 +1707,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#the-strategy">1.2 The Strategy</a></li>
 <li><a href="#the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</a></li>
 </ul></li>
-<li><a href="#data-comes-first">Data comes first</a>
+<li><a href="#data-comes-first">2. Data comes first</a>
 <ul>
-<li><a href="#constituents-data">Constituents Data</a></li>
+<li><a href="#constituents-data-eda">2.1 Constituents Data EDA</a>
+<ul>
+<li><a href="#the-time-series-of-sp500-constituents">2.1.1 The time series of S&amp;P500 constituents</a></li>
+</ul></li>
 <li><a href="#data-wrangling">Data wrangling</a></li>
 </ul></li>
 </ul>
@@ -1730,17 +1725,16 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>The S&amp;P500 index…</p>
 <p>it rebalances every…</p>
 <h2 id="the-strategy">1.2 The Strategy</h2>
+<p>The strategy consists of selecting the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis. Each day before the market opens, we look back on the Price ROCs of the previous close and buy the 10 stocks with the highest ROC.</p>
 <h2 id="the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</h2>
-<p><a href="https://www.investopedia.com/terms/p/pricerateofchange.asp" class="uri">https://www.investopedia.com/terms/p/pricerateofchange.asp</a></p>
-<p>The ROC for 200 days would simply be:</p>
+<p>The Price ROC for 200 days is calculated as:</p>
 <p><span class="math display">\[\begin{equation}
 \text{ROC}_{200d} = \left(\dfrac{P_t}{P_{t-200}}-1\right) \times 100
 \end{equation}\]</span></p>
-<h1 id="data-comes-first">Data comes first</h1>
+<h1 id="data-comes-first">2. Data comes first</h1>
 <p>We were provided with two datasets: <code>closes.csv</code> and <code>constituents.csv</code>. We will begin by exploring the latter.</p>
-<h2 id="constituents-data">Constituents Data</h2>
-<p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code> for <code>1,084</code> different securities.</p>
-<p>We also read the <code>constituents.csv</code> data.</p>
+<h2 id="constituents-data-eda">2.1 Constituents Data EDA</h2>
+<p>We import the <code>constituents.csv</code> data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituents</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span><span class="st">&quot;data/constituents.csv&quot;</span>, col_types <span class="op">=</span> <span class="st">&quot;dDcccccc&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -1751,13 +1745,13 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 <pre><code>Rows: 48,388
 Columns: 7
-$ date         &lt;date&gt; 2020-12-31, 2020-12-31, 2020-12-31, 2020-12...
-$ action       &lt;chr&gt; &quot;historical&quot;, &quot;current&quot;, &quot;historical&quot;, &quot;curr...
-$ ticker       &lt;chr&gt; &quot;ZTS&quot;, &quot;ZTS&quot;, &quot;ZION&quot;, &quot;ZION&quot;, &quot;ZBRA&quot;, &quot;ZBRA&quot;...
-$ name         &lt;chr&gt; &quot;Zoetis Inc&quot;, &quot;Zoetis Inc&quot;, &quot;Zions Bancorpor...
-$ contraticker &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-$ contraname   &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-$ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
+$ date         [3m[90m&lt;date&gt;[39m[23m 2020-12-31, 2020-12-31, 2020-12-31, 2020-12...
+$ action       [3m[90m&lt;chr&gt;[39m[23m &quot;historical&quot;, &quot;current&quot;, &quot;historical&quot;, &quot;curr...
+$ ticker       [3m[90m&lt;chr&gt;[39m[23m &quot;ZTS&quot;, &quot;ZTS&quot;, &quot;ZION&quot;, &quot;ZION&quot;, &quot;ZBRA&quot;, &quot;ZBRA&quot;...
+$ name         [3m[90m&lt;chr&gt;[39m[23m &quot;Zoetis Inc&quot;, &quot;Zoetis Inc&quot;, &quot;Zions Bancorpor...
+$ contraticker [3m[90m&lt;chr&gt;[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ contraname   [3m[90m&lt;chr&gt;[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+$ note         [3m[90m&lt;chr&gt;[39m[23m NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
 </div>
 <p>Let’s use the <code>skimr</code> package to print a quick summary of missing and unique values of the data:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -1910,27 +1904,11 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 </tbody>
 </table>
 </div>
-<p>We see that the columns <code>contraticker</code>, <code>contraname</code> and <code>note</code> are the only columns that have missing values, which is both logical and acceptable.</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 48,388 x 7
-   date       action  ticker name      contraticker contraname   note 
-   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;
- 1 1957-03-04 added   WWY    Wrigley ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 2 1957-03-04 added   WNDXQ  Winn Dix~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 3 1957-03-04 added   WLA    Warner L~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 4 1957-03-04 added   WGL    Wgl Hold~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 5 1957-03-04 removed WAB    Westingh~ GT           Goodyear Ti~ &lt;NA&gt; 
- 6 1957-03-04 added   VO1    Seagram ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 7 1957-03-04 added   USG    Usg Corp  &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 8 1957-03-04 added   UNP    Union Pa~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 9 1957-03-04 added   UK1    Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
-10 1957-03-04 added   UCC1   Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
-# ... with 48,378 more rows</code></pre>
-</div>
+<p>Some notes on the table above:</p>
+<ol type="1">
+<li><p>The dataset consists of 6 character-type variables and 1 date-type variable.</p></li>
+<li><p>According to the table above, there are 4 unique values for the <code>action</code> variable. Let’s see what are those:</p></li>
+</ol>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
@@ -1944,9 +1922,128 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 3 added     
 4 removed   </code></pre>
 </div>
+<ol start="3" type="1">
+<li><p>The data goes from 1957-03-04 through 2020-12-31 but we don’t have daily data since there are only 856 unique dates.</p></li>
+<li><p>The columns <code>contraticker</code>, <code>contraname</code> and <code>note</code> are the only columns that have missing values, which is both logical and acceptable.</p></li>
+<li><p>The <code>contraticker</code> and <code>contraname</code> columns see to be the opposite of the stocks that are added/removed to the index. Let’s check that with some steps:</p></li>
+</ol>
+<ul>
+<li>Check all possible different <code>action</code> values when there are no missing values of either the <code>contraticker</code> or <code>contraname</code> variables.</li>
+</ul>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">contraticker</span><span class="op">)</span> <span class="op">|</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">contraname</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">distinct</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 2 x 1
+  action 
+  &lt;chr&gt;  
+1 added  
+2 removed</code></pre>
+</div>
+<ul>
+<li>Inspect some rows where there are no missing values of either the <code>contraticker</code> or <code>contraname</code> variables.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">contraticker</span><span class="op">)</span> <span class="op">|</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">contraname</span><span class="op">)</span><span class="op">)</span> 
+</code></pre>
+</div>
+<pre><code># A tibble: 1,270 x 7
+   date       action  ticker name     contraticker contraname    note 
+   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;        &lt;chr&gt;         &lt;chr&gt;
+ 1 2020-12-21 added   TSLA   Tesla I~ AIV          Apartment In~ &lt;NA&gt; 
+ 2 2020-12-21 removed AIV    Apartme~ TSLA         Tesla Inc     &lt;NA&gt; 
+ 3 2020-10-12 added   VNT    Vontier~ NBL          Noble Energy~ &lt;NA&gt; 
+ 4 2020-10-12 removed NBL    Noble E~ VNT          Vontier Corp  &lt;NA&gt; 
+ 5 2020-09-21 added   TER    Teradyn~ COTY         Coty Inc      &lt;NA&gt; 
+ 6 2020-09-21 removed KSS    KOHLS C~ CTLT         Catalent Inc  &lt;NA&gt; 
+ 7 2020-09-21 removed HRB    H&amp;R Blo~ ETSY         Etsy Inc      &lt;NA&gt; 
+ 8 2020-09-21 added   ETSY   Etsy Inc HRB          H&amp;R Block Inc &lt;NA&gt; 
+ 9 2020-09-21 added   CTLT   Catalen~ KSS          KOHLS Corp    &lt;NA&gt; 
+10 2020-09-21 removed COTY   Coty Inc TER          Teradyne Inc  &lt;NA&gt; 
+# ... with 1,260 more rows</code></pre>
+</div>
+<p>Indeed this is the case. We can see, for example, on the first row: TSLA is being added and replaced by AIV. On the next row we see the oppositve operation: AIV is being removed and substituted by TSLA.</p>
+<ul>
+<li>Another important check we must do is that there are no errors in the ticker, name relationship. That is, for every (ticker, name) pair there must be just one count per value-key pair.</li>
+</ul>
+<p>We first get the count for each key-value pair:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">ticker</span>, <span class="va">name</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">ticker</span>, <span class="va">name</span>, name <span class="op">=</span> <span class="st">&quot;count&quot;</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1,112 x 3
+   ticker name                        count
+   &lt;chr&gt;  &lt;chr&gt;                       &lt;int&gt;
+ 1 A      Agilent Technologies Inc        1
+ 2 AAL    American Airlines Group Inc     1
+ 3 AAMRQ  Amr Corp                        1
+ 4 AAP    Advance Auto Parts Inc          1
+ 5 AAPL   Apple Inc                       1
+ 6 ABBV   AbbVie Inc                      1
+ 7 ABC    Amerisourcebergen Corp          1
+ 8 ABI1   Applied Biosystems Inc          1
+ 9 ABKFQ  Ambac Financial Group Inc       1
+10 ABMD   Abiomed Inc                     1
+# ... with 1,102 more rows</code></pre>
+</div>
+<p>Now we filter the counts that are great or equal to 2:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu">distinct</span><span class="op">(</span><span class="va">ticker</span>, <span class="va">name</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">count</span><span class="op">(</span><span class="va">ticker</span>, <span class="va">name</span>, name <span class="op">=</span> <span class="st">&quot;count&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">count</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 0 x 3
+# ... with 3 variables: ticker &lt;chr&gt;, name &lt;chr&gt;, count &lt;int&gt;</code></pre>
+</div>
+<p>We get no rows, which means that the data is correct.</p>
+<h3 id="the-time-series-of-sp500-constituents">2.1.1 The time series of S&amp;P500 constituents</h3>
+<p>In this section we’ll create a time series that will contain, for each date, the constituents of the S&amp;P500 index. We’ll start by focusing on the <code>action</code> column.</p>
+<p>Since we are focusing on time, we’ll add some time-related variables, such as:</p>
+<ul>
+<li><code>year</code>: The year of the <em>time series</em> <code>date</code>.</li>
+<li><code>half</code>: The <em>half component</em> of the index (i.e. to which semester does the date belong to).</li>
+<li><code>quarter</code>: The <em>quarter component</em> of the index (i.e. to which quarter does the date belong to).</li>
+<li><code>month</code>: The <em>month component</em> of the index (with base 1 - that is, January = 1 and so on).</li>
+<li><code>month_label</code>: The three-letter month label as an ordered categorical variable. It begins with <em>Jan</em> and ends with <em>Dec</em>.</li>
+<li><code>day</code>: The <em>day</em> component of the <code>date</code>.</li>
+<li><code>wday</code>: The day of the week with base 1. Monday = 1 and Sunday = 7.</li>
+<li><code>wday_label</code>: The three-letter label for day of the week as an ordered categorical variable. It begins with <code>Mon</code> and ends with <code>Sun</code>.</li>
+<li><code>qday</code>: The day of the quarter.</li>
+<li><code>yday</code>: The day of the year.</li>
+</ul>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents_ts</span> <span class="op">&lt;-</span> <span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  
+  <span class="co"># Create time series signature</span>
+  <span class="fu">mutate</span><span class="op">(</span>
+    date_year        <span class="op">=</span> <span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
+    date_half        <span class="op">=</span> <span class="fu">semester</span><span class="op">(</span><span class="va">date</span>, with_year <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,
+    date_quarter     <span class="op">=</span> <span class="fu">quarter</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
+    date_month       <span class="op">=</span> <span class="fu">month</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
+    date_month_label <span class="op">=</span> <span class="fu">month</span><span class="op">(</span><span class="va">date</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
+    date_day         <span class="op">=</span> <span class="fu">day</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
+    date_wday        <span class="op">=</span> <span class="fu">wday</span><span class="op">(</span><span class="va">date</span>, week_start <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,
+    date_wday_label  <span class="op">=</span> <span class="fu">wday</span><span class="op">(</span><span class="va">date</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
+    date_qday        <span class="op">=</span> <span class="fu">qday</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
+    date_yday        <span class="op">=</span> <span class="fu">yday</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+  <span class="op">)</span>
+</code></pre>
+</div>
+</div>
+<p>How are <code>actions</code> distributed along the data?</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
 </code></pre>
 </div>
 <pre><code># A tibble: 4 x 2
@@ -1957,10 +2054,10 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 3 historical 46110
 4 removed      636</code></pre>
 </div>
-<p><code>current</code> debe de corresponder a la muestra más reciente del S&amp;P500. Corroboramos esto viendo los valores únicos para la fecha donde tenemos valores de <code>current</code>:</p>
+<p><code>current</code> appears to correspond to the index’s most recent constituents. We can check if this is the case by taking the unique values for the <code>date</code> variable when the <code>action</code> variable has the <em>current</em> value.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
   <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;current&quot;</span>
 <span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
 </code></pre>
@@ -1969,6 +2066,130 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
   date      
   &lt;date&gt;    
 1 2020-12-31</code></pre>
+</div>
+<p>Indeed, the only date where a <em>current</em> value appears is 2020-12-31</p>
+<p>Next, we pivot the data to a <em>wide</em> format so we can clearly see the difference between each <code>action</code> value. By doing this, we can have a single column for each of the 4 unique values in the <code>action</code> variable.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents_wide</span> <span class="op">&lt;-</span> <span class="va">constituents_ts</span> <span class="op">%&gt;%</span> 
+  <span class="fu">pivot_wider</span><span class="op">(</span>
+    names_from <span class="op">=</span> <span class="va">action</span>,
+    values_from <span class="op">=</span> <span class="va">name</span>
+    <span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">relocate</span><span class="op">(</span><span class="va">historical</span>, <span class="va">current</span>, <span class="va">added</span>, <span class="va">removed</span>, .after <span class="op">=</span> <span class="va">ticker</span><span class="op">)</span>
+
+<span class="va">constituents_wide</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 47,883 x 19
+   date       ticker historical current added removed contraticker
+   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;       
+ 1 2020-12-31 ZTS    Zoetis Inc Zoetis~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 2 2020-12-31 ZION   Zions Ban~ Zions ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 3 2020-12-31 ZBRA   Zebra Tec~ Zebra ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 4 2020-12-31 ZBH    Zimmer Bi~ Zimmer~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 5 2020-12-31 YUM    Yum Brand~ Yum Br~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 6 2020-12-31 XYL    Xylem Inc  Xylem ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 7 2020-12-31 XRX    Xerox Hol~ Xerox ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 8 2020-12-31 XRAY   DENTSPLY ~ DENTSP~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 9 2020-12-31 XOM    Exxon Mob~ Exxon ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+10 2020-12-31 XLNX   Xilinx Inc Xilinx~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+# ... with 47,873 more rows, and 12 more variables: contraname &lt;chr&gt;,
+#   note &lt;chr&gt;, date_year &lt;dbl&gt;, date_half &lt;int&gt;, date_quarter &lt;int&gt;,
+#   date_month &lt;dbl&gt;, date_month_label &lt;ord&gt;, date_day &lt;int&gt;,
+#   date_wday &lt;dbl&gt;, date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;,
+#   date_yday &lt;dbl&gt;</code></pre>
+</div>
+<p>Let’s inspect the data for the first date <code>1957-03-04</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents_wide</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;1957-03-04&quot;</span><span class="op">)</span>
+  <span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 97 x 19
+   date       ticker historical current added removed contraticker
+   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;       
+ 1 1957-03-04 WWY    &lt;NA&gt;       &lt;NA&gt;    Wrig~ &lt;NA&gt;    &lt;NA&gt;        
+ 2 1957-03-04 WNDXQ  &lt;NA&gt;       &lt;NA&gt;    Winn~ &lt;NA&gt;    &lt;NA&gt;        
+ 3 1957-03-04 WLA    &lt;NA&gt;       &lt;NA&gt;    Warn~ &lt;NA&gt;    &lt;NA&gt;        
+ 4 1957-03-04 WGL    &lt;NA&gt;       &lt;NA&gt;    Wgl ~ &lt;NA&gt;    &lt;NA&gt;        
+ 5 1957-03-04 WAB    &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;  Westin~ GT          
+ 6 1957-03-04 VO1    &lt;NA&gt;       &lt;NA&gt;    Seag~ &lt;NA&gt;    &lt;NA&gt;        
+ 7 1957-03-04 USG    &lt;NA&gt;       &lt;NA&gt;    Usg ~ &lt;NA&gt;    &lt;NA&gt;        
+ 8 1957-03-04 UNP    &lt;NA&gt;       &lt;NA&gt;    Unio~ &lt;NA&gt;    &lt;NA&gt;        
+ 9 1957-03-04 UK1    &lt;NA&gt;       &lt;NA&gt;    Unio~ &lt;NA&gt;    &lt;NA&gt;        
+10 1957-03-04 UCC1   &lt;NA&gt;       &lt;NA&gt;    Unio~ &lt;NA&gt;    &lt;NA&gt;        
+# ... with 87 more rows, and 12 more variables: contraname &lt;chr&gt;,
+#   note &lt;chr&gt;, date_year &lt;dbl&gt;, date_half &lt;int&gt;, date_quarter &lt;int&gt;,
+#   date_month &lt;dbl&gt;, date_month_label &lt;ord&gt;, date_day &lt;int&gt;,
+#   date_wday &lt;dbl&gt;, date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;,
+#   date_yday &lt;dbl&gt;</code></pre>
+</div>
+<p>It’s clear that we don’t have the initial S&amp;P500 sample, so we will have to reverse engineer the constituents at each date. Let’s start by the final date <code>2020-12-31</code>:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-12-31&quot;</span><span class="op">)</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1,010 x 7
+   date       action  ticker name        contraticker contraname note 
+   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;
+ 1 2020-12-31 histor~ ZTS    Zoetis Inc  &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 2 2020-12-31 current ZTS    Zoetis Inc  &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 3 2020-12-31 histor~ ZION   Zions Banc~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 4 2020-12-31 current ZION   Zions Banc~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 5 2020-12-31 histor~ ZBRA   Zebra Tech~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 6 2020-12-31 current ZBRA   Zebra Tech~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 7 2020-12-31 histor~ ZBH    Zimmer Bio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 8 2020-12-31 current ZBH    Zimmer Bio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 9 2020-12-31 histor~ YUM    Yum Brands~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+10 2020-12-31 current YUM    Yum Brands~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+# ... with 1,000 more rows</code></pre>
+</div>
+<p>We see that we have sort-of-duplicated rows; we note that one <code>action</code> label corresponds to <code>historical</code> and the other one to <code>current</code>. Let’s check that we actually have the same number per category:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-12-31&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 2 x 2
+  action         n
+  &lt;chr&gt;      &lt;int&gt;
+1 current      505
+2 historical   505</code></pre>
+</div>
+<p>Inspecting the data, it appears that the <code>historical</code> variable gives us the constituents at each quarter. This is backed by the fact that on the latest available date, we have the <code>current</code> constituents which correspond to the 4Q20. However, we have the exact same rows bu with a <code>historical</code> label.</p>
+<p>Let’s inspect the dates on which there are no missing values for the <code>historical</code> action.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">constituents_wide</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">historical</span><span class="op">)</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 46,110 x 19
+   date       ticker historical current added removed contraticker
+   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;       
+ 1 2020-12-31 ZTS    Zoetis Inc Zoetis~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 2 2020-12-31 ZION   Zions Ban~ Zions ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 3 2020-12-31 ZBRA   Zebra Tec~ Zebra ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 4 2020-12-31 ZBH    Zimmer Bi~ Zimmer~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 5 2020-12-31 YUM    Yum Brand~ Yum Br~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 6 2020-12-31 XYL    Xylem Inc  Xylem ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 7 2020-12-31 XRX    Xerox Hol~ Xerox ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 8 2020-12-31 XRAY   DENTSPLY ~ DENTSP~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+ 9 2020-12-31 XOM    Exxon Mob~ Exxon ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+10 2020-12-31 XLNX   Xilinx Inc Xilinx~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
+# ... with 46,100 more rows, and 12 more variables: contraname &lt;chr&gt;,
+#   note &lt;chr&gt;, date_year &lt;dbl&gt;, date_half &lt;int&gt;, date_quarter &lt;int&gt;,
+#   date_month &lt;dbl&gt;, date_month_label &lt;ord&gt;, date_day &lt;int&gt;,
+#   date_wday &lt;dbl&gt;, date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;,
+#   date_yday &lt;dbl&gt;</code></pre>
 </div>
 <p>A partir de cuándo empiezan y terminan los <code>historical</code>?</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2062,65 +2283,28 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 10 2000-06-30
 # ... with 82 more rows</code></pre>
 </div>
-<p>Let’s see the data for the first date <code>1957-03-04</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
-    <span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;1957-03-04&quot;</span><span class="op">)</span>
-  <span class="op">)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 97 x 7
-   date       action  ticker name      contraticker contraname   note 
-   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;        &lt;chr&gt;
- 1 1957-03-04 added   WWY    Wrigley ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 2 1957-03-04 added   WNDXQ  Winn Dix~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 3 1957-03-04 added   WLA    Warner L~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 4 1957-03-04 added   WGL    Wgl Hold~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 5 1957-03-04 removed WAB    Westingh~ GT           Goodyear Ti~ &lt;NA&gt; 
- 6 1957-03-04 added   VO1    Seagram ~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 7 1957-03-04 added   USG    Usg Corp  &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 8 1957-03-04 added   UNP    Union Pa~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
- 9 1957-03-04 added   UK1    Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
-10 1957-03-04 added   UCC1   Union Ca~ &lt;NA&gt;         &lt;NA&gt;         &lt;NA&gt; 
-# ... with 87 more rows</code></pre>
-</div>
-<p>It’s clear that we don’t have the initial S&amp;P500 sample, so we will have to reverse engineer the constituents at each date. Let’s start by the final date <code>2020-12-31</code>:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-12-31&quot;</span><span class="op">)</span><span class="op">)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 1,010 x 7
-   date       action  ticker name        contraticker contraname note 
-   &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;       &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;
- 1 2020-12-31 histor~ ZTS    Zoetis Inc  &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 2 2020-12-31 current ZTS    Zoetis Inc  &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 3 2020-12-31 histor~ ZION   Zions Banc~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 4 2020-12-31 current ZION   Zions Banc~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 5 2020-12-31 histor~ ZBRA   Zebra Tech~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 6 2020-12-31 current ZBRA   Zebra Tech~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 7 2020-12-31 histor~ ZBH    Zimmer Bio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 8 2020-12-31 current ZBH    Zimmer Bio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
- 9 2020-12-31 histor~ YUM    Yum Brands~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
-10 2020-12-31 current YUM    Yum Brands~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
-# ... with 1,000 more rows</code></pre>
-</div>
-<p>We see that we have sort-of-duplicated rows; we note that one <code>action</code> label corresponds to <code>historical</code> and the other one to <code>current</code>. Let’s check that we actually have the same number per category:</p>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-12-31&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 2 x 2
-  action         n
-  &lt;chr&gt;      &lt;int&gt;
-1 current      505
-2 historical   505</code></pre>
+<pre><code># A tibble: 1,412 x 3
+# Groups:   date [856]
+   date       action      n
+   &lt;date&gt;     &lt;chr&gt;   &lt;int&gt;
+ 1 1957-03-04 added      96
+ 2 1957-03-04 removed     1
+ 3 1963-06-27 added       1
+ 4 1963-06-27 removed     1
+ 5 1963-12-05 added       1
+ 6 1964-01-30 added       1
+ 7 1964-02-20 added       4
+ 8 1964-03-31 added      42
+ 9 1964-06-30 added       2
+10 1964-09-30 added       1
+# ... with 1,402 more rows</code></pre>
 </div>
 <p>We can focus on the <code>added</code> and <code>removed</code> actions, since it is these values the ones that hold most information regarding the S&amp;P500 constituents. Since we’re reverse engineering the index’s constituents, we’ll create a new variable (<code>reverse_action</code>) that tells us whether we have to add or remove that stock from the constituents. In case the <code>action</code> variable is <code>historical</code> or <code>current</code> we simply assign <code>no action</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2135,24 +2319,17 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituent_actions</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">reverse_action</span> <span class="op">!=</span> <span class="st">&quot;no action&quot;</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">reverse_action</span> <span class="op">!=</span> <span class="st">&quot;no action&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">count</span><span class="op">(</span><span class="va">reverse_action</span><span class="op">)</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 1,773 x 8
-   date       action ticker name  contraticker contraname note 
-   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;
- 1 2020-12-21 added  TSLA   Tesl~ AIV          Apartment~ &lt;NA&gt; 
- 2 2020-12-21 remov~ AIV    Apar~ TSLA         Tesla Inc  &lt;NA&gt; 
- 3 2020-10-12 added  VNT    Vont~ NBL          Noble Ene~ &lt;NA&gt; 
- 4 2020-10-12 remov~ NBL    Nobl~ VNT          Vontier C~ &lt;NA&gt; 
- 5 2020-09-21 added  TER    Tera~ COTY         Coty Inc   &lt;NA&gt; 
- 6 2020-09-21 remov~ KSS    KOHL~ CTLT         Catalent ~ &lt;NA&gt; 
- 7 2020-09-21 remov~ HRB    H&amp;R ~ ETSY         Etsy Inc   &lt;NA&gt; 
- 8 2020-09-21 added  ETSY   Etsy~ HRB          H&amp;R Block~ &lt;NA&gt; 
- 9 2020-09-21 added  CTLT   Cata~ KSS          KOHLS Corp &lt;NA&gt; 
-10 2020-09-21 remov~ COTY   Coty~ TER          Teradyne ~ &lt;NA&gt; 
-# ... with 1,763 more rows, and 1 more variable: reverse_action &lt;chr&gt;</code></pre>
+<pre><code># A tibble: 2 x 2
+  reverse_action     n
+  &lt;chr&gt;          &lt;int&gt;
+1 add              636
+2 remove          1137</code></pre>
 </div>
+<p>filtrar sólo 2020 historical en teoría</p>
 <h2 id="data-wrangling">Data wrangling</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2196,6 +2373,26 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 #   SIVB &lt;dbl&gt;, SHW &lt;dbl&gt;, SEE &lt;dbl&gt;, SCHW &lt;dbl&gt;, SBUX &lt;dbl&gt;,
 #   SBAC &lt;dbl&gt;, RTX &lt;dbl&gt;, RSG &lt;dbl&gt;, ROST &lt;dbl&gt;, ROP &lt;dbl&gt;,
 #   ROL &lt;dbl&gt;, ...</code></pre>
+</div>
+<p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code> for <code>1,084</code> different securities.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="co"># roc_close &lt;- close_tbl %&gt;% </span>
+<span class="co">#   mutate(</span>
+<span class="co">#     across(</span>
+<span class="co">#       .cols = -date, </span>
+<span class="co">#       .fns = ~ (.x / lag(.x, n = 200L)) - 1,</span>
+<span class="co">#       .names = &quot;ROC_{.col}&quot;</span>
+<span class="co">#       )</span>
+<span class="co">#     )</span>
+</code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="co"># close_tbl %&gt;% skimr::skim_without_charts()</span>
+</code></pre>
+</div>
 </div>
 <p>We get the data into a long format (instead of the wide format with <code>1,085</code> columns).</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2243,7 +2440,7 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
 1 2010-01-01 AAPL      0.5</code></pre>
 </div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
