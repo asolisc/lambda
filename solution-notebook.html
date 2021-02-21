@@ -1710,40 +1710,38 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </ul></li>
 <li><a href="#data-comes-first">2. Data comes first</a>
 <ul>
-<li><a href="#constituents-data-eda">2.1 Constituents Data EDA</a>
-<ul>
+<li><a href="#constituents-data-eda">2.1 Constituents Data EDA</a></li>
 <li><a href="#the-time-series-of-sp500-constituents">2.1.1 The time series of S&amp;P500 constituents</a></li>
-</ul></li>
-<li><a href="#data-wrangling">Data wrangling</a></li>
+<li><a href="#data-wrangling">2.2 Data wrangling</a></li>
 </ul></li>
 </ul>
 </nav>
 </div>
 <h3 id="foreword-on-reproducibility">Foreword on Reproducibility</h3>
-<p>In order to run this code, you need to have installed <a href="https://cran.r-project.org/">R</a>, ideally <a href="https://rstudio.com/products/rstudio/download/#download">RStudio</a> too. Also, you would need to install the following packages:</p>
+<p>In order to run this notebook, you need to have <a href="https://cran.r-project.org/">R</a> installed, ideally <a href="https://rstudio.com/products/rstudio/download/#download">RStudio</a> too. Also, you would need to install the following packages:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="co"># NOT RUN</span>
-<span class="co"># install.packages(c(&quot;tidyverse&quot;, &quot;lubridate&quot;, &quot;glue&quot;, &quot;skimr))</span>
+<span class="co"># install.packages(c(&quot;tidyverse&quot;, &quot;lubridate&quot;, &quot;glue&quot;, &quot;skimr&quot;))</span>
 </code></pre>
 </div>
 </div>
-<h1 id="introduction">1. Introduction</h1>
+<h2 id="introduction">1. Introduction</h2>
 <p>The task is to develop a backtest for a strategy that trades constituents of the S&amp;P500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis.</p>
 <p>It’s important to verify that it only selects stocks that are part of the S&amp;P500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.</p>
-<h2 id="the-sp500-index">1.1 The S&amp;P500 Index</h2>
+<h3 id="the-sp500-index">1.1 The S&amp;P500 Index</h3>
 <p>The S&amp;P500 index…</p>
 <p>it rebalances every…</p>
-<h2 id="the-strategy">1.2 The Strategy</h2>
+<h3 id="the-strategy">1.2 The Strategy</h3>
 <p>The strategy consists of selecting the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis. Each day before the market opens, we look back on the Price ROCs of the previous close and buy the 10 stocks with the highest ROC.</p>
-<h2 id="the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</h2>
+<h3 id="the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</h3>
 <p>The Price ROC for 200 days is calculated as:</p>
 <p><span class="math display">\[\begin{equation}
 \text{ROC}_{200d} = \left(\dfrac{P_t}{P_{t-200}}-1\right) \times 100
 \end{equation}\]</span></p>
-<h1 id="data-comes-first">2. Data comes first</h1>
+<h2 id="data-comes-first">2. Data comes first</h2>
 <p>We were provided with two datasets: <code>closes.csv</code> and <code>constituents.csv</code>. We will begin by exploring the latter.</p>
-<h2 id="constituents-data-eda">2.1 Constituents Data EDA</h2>
+<h3 id="constituents-data-eda">2.1 Constituents Data EDA</h3>
 <p>We import the <code>constituents.csv</code> data.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2175,32 +2173,23 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 2 historical   505</code></pre>
 </div>
 <p>Inspecting the data, it appears that the <code>historical</code> variable gives us the constituents at each quarter. This is backed by the fact that on the latest available date, we have the <code>current</code> constituents which correspond to the 4Q20. However, we have the exact same rows bu with a <code>historical</code> label.</p>
-<p>Let’s inspect the dates on which there are no missing values for the <code>historical</code> action.</p>
+<p>Let’s inspect the dates on which there are no missing values for the <code>historical</code> action. We can check the unique values for the month number:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituents_wide</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">historical</span><span class="op">)</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">historical</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">distinct</span><span class="op">(</span><span class="va">date_month</span>, <span class="va">date_quarter</span><span class="op">)</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 46,110 x 19
-   date       ticker historical current added removed contraticker
-   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;       
- 1 2020-12-31 ZTS    Zoetis Inc Zoetis~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 2 2020-12-31 ZION   Zions Ban~ Zions ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 3 2020-12-31 ZBRA   Zebra Tec~ Zebra ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 4 2020-12-31 ZBH    Zimmer Bi~ Zimmer~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 5 2020-12-31 YUM    Yum Brand~ Yum Br~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 6 2020-12-31 XYL    Xylem Inc  Xylem ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 7 2020-12-31 XRX    Xerox Hol~ Xerox ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 8 2020-12-31 XRAY   DENTSPLY ~ DENTSP~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
- 9 2020-12-31 XOM    Exxon Mob~ Exxon ~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
-10 2020-12-31 XLNX   Xilinx Inc Xilinx~ &lt;NA&gt;  &lt;NA&gt;    &lt;NA&gt;        
-# ... with 46,100 more rows, and 12 more variables: contraname &lt;chr&gt;,
-#   note &lt;chr&gt;, date_year &lt;dbl&gt;, date_half &lt;int&gt;, date_quarter &lt;int&gt;,
-#   date_month &lt;dbl&gt;, date_month_label &lt;ord&gt;, date_day &lt;int&gt;,
-#   date_wday &lt;dbl&gt;, date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;,
-#   date_yday &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 4 x 2
+  date_quarter date_month
+         &lt;int&gt;      &lt;dbl&gt;
+1            4         12
+2            3          9
+3            2          6
+4            1          3</code></pre>
 </div>
+<p>Indeed, the only months were <code>historical</code> actions are not missing are <em>mod 3</em> months (i.e. the end of each quarter).</p>
 <p>A partir de cuándo empiezan y terminan los <code>historical</code>?</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2340,7 +2329,7 @@ $ note         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code
 2 remove          1137</code></pre>
 </div>
 <p>filtrar sólo 2020 historical en teoría</p>
-<h2 id="data-wrangling">Data wrangling</h2>
+<h3 id="data-wrangling">2.2 Data wrangling</h3>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="co"># Use read_csv() function to read the close data</span>

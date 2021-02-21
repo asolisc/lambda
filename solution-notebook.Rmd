@@ -29,32 +29,32 @@ library(skimr)
 
 ### Foreword on Reproducibility
 
-In order to run this code, you need to have installed [R](https://cran.r-project.org/), ideally [RStudio](https://rstudio.com/products/rstudio/download/#download) too. Also, you would need to install the following packages:
+In order to run this notebook, you need to have [R](https://cran.r-project.org/) installed, ideally [RStudio](https://rstudio.com/products/rstudio/download/#download) too. Also, you would need to install the following packages:
 
 ```{r, eval=FALSE}
 # NOT RUN
-# install.packages(c("tidyverse", "lubridate", "glue", "skimr))
+# install.packages(c("tidyverse", "lubridate", "glue", "skimr"))
 ```
 
 
-# 1. Introduction
+## 1. Introduction
 
 The task is to develop a backtest for a strategy that trades constituents of the S&P500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest [Price Rate of Change Indicator (ROC)](https://www.investopedia.com/terms/p/pricerateofchange.asp) and buys them on an equally-weighted basis.
 
 It's important to verify that it only selects stocks that are part of the S&P500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.
 
 
-## 1.1 The S&P500 Index
+### 1.1 The S&P500 Index
 
 The S&P500 index...
 
 it rebalances every...
 
-## 1.2 The Strategy
+### 1.2 The Strategy
 
 The strategy consists of selecting the 10 stocks with the highest [Price Rate of Change Indicator (ROC)](https://www.investopedia.com/terms/p/pricerateofchange.asp) and buys them on an equally-weighted basis. Each day before the market opens, we look back on the Price ROCs of the previous close and buy the 10 stocks with the highest ROC.
 
-## 1.3 The Price Rate of Change (ROC)
+### 1.3 The Price Rate of Change (ROC)
 
 The Price ROC for 200 days is calculated as:
 
@@ -63,11 +63,11 @@ The Price ROC for 200 days is calculated as:
 \end{equation}
 
 
-# 2. Data comes first
+## 2. Data comes first
 
 We were provided with two datasets: `closes.csv` and `constituents.csv`. We will begin by exploring the latter.
 
-## 2.1 Constituents Data EDA
+### 2.1 Constituents Data EDA
 
 
 We import the `constituents.csv` data.
@@ -236,15 +236,16 @@ constituents %>%
 
 Inspecting the data, it appears that the `historical` variable gives us the constituents at each quarter. This is backed by the fact that on the latest available date, we have the `current` constituents which correspond to the 4Q20. However, we have the exact same rows bu with a `historical` label. 
 
-Let's inspect the dates on which there are no missing values for the `historical` action.
+Let's inspect the dates on which there are no missing values for the `historical` action. We can check the unique values for the month number:
 
 ```{r}
 constituents_wide %>% 
-  filter(!is.na(historical))
+  filter(!is.na(historical)) %>%
+  distinct(date_month, date_quarter)
 ```
 
 
-
+Indeed, the only months were `historical` actions are not missing are _mod 3_ months (i.e. the end of each quarter).
 
 
 
@@ -353,7 +354,7 @@ historical en teoría
 
 
 
-## Data wrangling
+### 2.2 Data wrangling
 
 ```{r}
 # Use read_csv() function to read the close data
