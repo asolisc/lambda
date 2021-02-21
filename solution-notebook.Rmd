@@ -39,14 +39,14 @@ In order to run this notebook, you need to have [R](https://cran.r-project.org/)
 
 ## 1. Introduction
 
-The task is to develop a backtest for a strategy that trades constituents of the S&P500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest [Price Rate of Change Indicator (ROC)](https://www.investopedia.com/terms/p/pricerateofchange.asp) and buys them on an equally-weighted basis.
+The task is to develop a backtest for a strategy that trades constituents of the S&P 500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest [Price Rate of Change Indicator (ROC)](https://www.investopedia.com/terms/p/pricerateofchange.asp) and buys them on an equally-weighted basis.
 
-It's important to verify that it only selects stocks that are part of the S&P500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.
+It's important to verify that it only selects stocks that are part of the S&P 500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.
 
 
-### 1.1 The S&P500 Index
+### 1.1 The S&P 500 Index
 
-The S&P500 index...
+The S&P 500 index...
 
 it rebalances every...
 
@@ -145,7 +145,7 @@ We get no rows, which means that the data is correct.
 
 ### 2.1.1 Time variables and `action` in the `constituents` dataset
 
-In this section we'll create a time series that will contain, for each date, the constituents of the S&P500 index. We'll start by focusing on the `action` column.
+In this section we'll create a time series that will contain, for each date, the constituents of the S&P 500 index.
 
 Since we are focusing on time, we'll add some time-related variables, such as:
 
@@ -192,15 +192,17 @@ constituents_ts <- constituents %>%
 How are `actions` distributed along the data?
 
 ```{r}
-constituents_ts %>% count(action)
+constituents_ts %>% count(action, sort = T)
 ```
 
 `current` appears to correspond to the index's most recent constituents. We can check if this is the case by taking the unique values for the `date` variable when the `action` variable has the _current_ value.
 
 ```{r}
-constituents_ts %>% filter(
-  action == "current"
-) %>% distinct(date)
+constituents_ts %>% 
+  filter(
+    action == "current"
+  ) %>% 
+  distinct(date)
 ```
 
 Indeed, the only date where a _current_ value appears is `r constituents_ts %>% filter(action == "current") %>% distinct(date)`
@@ -215,7 +217,7 @@ constituents_wide %>%
   )
 ```
 
-It's clear that we don't have the initial S&P500 sample, but we **could** reverse engineer the constituents at each date. Let's start by the final date `2020-12-31`:
+It's clear that we don't have the initial S&P 500 sample, but we **could** reverse engineer the constituents at each date. Let's start by the final date `2020-12-31`:
 
 ```{r}
 constituents %>% 
@@ -238,7 +240,7 @@ constituents_wide <- constituents_ts %>%
   pivot_wider(
     names_from = action,
     values_from = name
-    ) %>% 
+  ) %>% 
   relocate(historical, current, added, removed, .after = ticker)
 
 constituents_wide
@@ -257,7 +259,7 @@ constituents_wide %>%
 
 Indeed, the only months were `historical` actions are not missing are _mod 3_ months (i.e. the end of each quarter).
 
-This points to the fact that probably the `historical` value indicates the constituents per quarter on the S&P500. We can further check the amount of `historical` values per quarter. The number should be around 500, of course.
+This points to the fact that probably the `historical` value indicates the constituents per quarter on the S&P 500. We can further check the amount of `historical` values per quarter. The number should be around 500, of course.
 
 ```{r}
 constituents_wide %>% 
@@ -349,7 +351,7 @@ all.equal(constituents_3Q20, calculated_3Q20)
 
 Voilà! We did get a `TRUE` value when comparing the reverse-engineered approach and the mere `historical` values. This confirms that we can use the `historical` values for our constituents.
 
-### 2.1.2 The time series of S&P500 constituents
+### 2.1.2 The time series of S&P 500 constituents
 
 We will now proceed to use these `historical` values for every day in the `closes.csv` dataset from `2010-01-01` through `2020-01-01`.
 
@@ -377,23 +379,27 @@ constituents_nested <- constituents_wide %>%
   # Nest the data
   nest(constituents = c(ticker, historical)) %>% 
   relocate(constituents, .after = 1) %>% 
-  arrange(date)
+  arrange(date) %>% 
+  
+  # Uncomment in case we want to get the number of constituents per date
+  # mutate(constituent_count = map_int(constituents, nrow)) %>% 
+  identity()
+
+constituents_nested
 ```
 
 We can now left_join the datasets:
 
 ```{r}
-constituents_joined <- required_dates %>% 
+constituents_nested <- required_dates %>% 
   left_join(constituents_nested, by = "date") %>% 
-  fill(constituents, .direction = "up") %>% 
-  add_ts_signature(.date_col = date)
+  fill(contains("constituent"), .direction = "up")
 
-constituents_joined
+constituents_nested
 ```
 
 
-Finally, we now have a time series with the corresponding composition of the S&P 500 for each date.
-
+Finally! We now have a time series with the corresponding composition of the S&P 500 for each date.
 
 
 ## 3. Implementing the ROC Strategy
@@ -412,6 +418,7 @@ close_tbl
 
 Apparently, we have daily closing data from `1997-12-31` through `2021-01-12` for `1,084` different securities.
 
+### 3.1 Calculating the 200-day ROC
 
 Secondly, calculate the 200-day ROC. We create a function to indicate the number of days (`ndays` argument) for the ROC calculation. This would be useful if we'd like to explore different days for the ROC.
 
@@ -421,19 +428,20 @@ add_price_roc <- function(df, .date_col, .ndays) {
   
   df %>% 
     mutate(
-    across(
-      .cols = -{{.date_col}},
-      .fns = ~ (.x / lag(.x, n = .ndays)) - 1,
-      .names = "ROC_{.col}"
+      across(
+        .cols = -{{.date_col}},
+        .fns = ~ ((.x / lag(.x, n = .ndays)) - 1) * 100,
+        .names = "ROC_{.col}"
       )
     ) %>% 
-  # keep rows where at least one of the ROC columns is not NA
-  filter(
-    if_any(contains("ROC"), ~ !is.na(.x))
+    # keep rows where at least one of the ROC columns is not NA
+    filter(
+      if_any(contains("ROC"), ~ !is.na(.x))
     )
 }
 ```
 
+Now let's use this function on our `closes.csv` data. This creates a column for each security that contains the `n-day` ROC for each security. The ROC numbers are in columns with the _ROC_ prefix to easily identify them.
 
 ```{r}
 roc_close <- close_tbl %>% 
@@ -441,34 +449,109 @@ roc_close <- close_tbl %>%
   add_price_roc(.date_col = date, 
                 .ndays = 200) %>%
   relocate(date, contains("ROC"))
-  
+
 roc_close
 ```
 
+### 3.2 Filtering data from 2010 onward
+
+Since the strategy will be implemented from 2010 onward, we can now filter out the data for previous years:
 
 ```{r}
-# close_tbl %>% skimr::skim_without_charts()
+roc_close <- roc_close %>% 
+  filter(year(date) > 2008)
+```
+
+### 3.3 Getting the data into a 'long' format
+
+We get the data into a long format (instead of the wide format with `2,169` columns). Also, a separation is made in two data frames: one for ROCs and the other one for prices. We call these `roc_long` and `close_long`, respectively.
+
+
+```{r}
+# Build a dataframe with ROC values
+roc_long <- roc_close %>% 
+  select(date, contains("ROC")) %>% 
+  pivot_longer(
+    cols = contains("ROC"),
+    names_to = "ticker",
+    names_pattern = "_(.*)",
+    values_to = "roc"
+  ) %>% 
+  add_column(data_type = "ROC")
+
+roc_long
 ```
 
 
-We get the data into a long format (instead of the wide format with `1,085` columns).
-
 ```{r}
-# close_long <- close_tbl %>% 
-#   pivot_longer(cols = -date, names_to = "ticker", values_to = "close") %>% 
-#   arrange(ticker, date)
-# 
-# close_long
+# Build a dataframe with price values
+close_long <- roc_close %>% 
+  select(-contains("ROC")) %>% 
+  pivot_longer(
+    cols = -date,
+    names_to = "ticker",
+    values_to = "price"
+  ) %>% 
+  add_column(data_type = "close")
+
+close_long
 ```
 
+We now nest both dataframes so we have a similar structure to the `constituents` data.
 
+```{r}
+roc_nested <- roc_long %>% 
+  nest(rocs = c(ticker, roc, data_type))
+  
+roc_nested
+```
+
+```{r}
+close_nested <- close_long %>% 
+  nest(prices = c(ticker, price, data_type))
+
+close_nested
+```
+
+### 3.4 Consolidated, Nested Data
+
+Having all three nested dataframes (constituents, prices and rocs) we can consolidate everything into a single dataframe. This will be used to analyze the strategy.
+
+```{r}
+consolidated_nested <- constituents_nested %>% 
+  left_join(close_nested) %>% 
+  left_join(roc_nested)
+
+consolidated_nested
+```
+
+In this `consolidated_nested` dataframe each row represents a single date. The advantage of this dataframe is that it contains the constituents, the prices, and rocs for each date.
+
+
+### 3.5 Stock Selection Per Day
+
+To code the stock selection, we start by defining the starting and ending dates.
 
 ```{r}
 start_date <- ymd("2010-01-01")
 end_date <- ymd("2020-01-01")
 ```
 
+Then, we can filter the `consolidated_nested` dataframe so we have data only for this range of dates.
 
+```{r}
+consolidated_nested <- consolidated_nested %>% 
+  filter(date %>% between(start_date - 1, end_date)
+  )
+```
+
+
+We can now create a function for the following steps:
+
+1. For each day, get the constituents of the S&P 500.
+2. Then, rank each of those constituents by 200-day ROC.
+3. Choose the top 10 stocks.
+4. Get the corresponding weights for each stock.
 
 Delivery:
 

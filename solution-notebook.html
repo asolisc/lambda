@@ -1704,7 +1704,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#foreword-on-reproducibility">Foreword on Reproducibility</a></li>
 <li><a href="#introduction">1. Introduction</a>
 <ul>
-<li><a href="#the-sp500-index">1.1 The S&amp;P500 Index</a></li>
+<li><a href="#the-sp-500-index">1.1 The S&amp;P 500 Index</a></li>
 <li><a href="#the-strategy">1.2 The Strategy</a></li>
 <li><a href="#the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</a></li>
 </ul></li>
@@ -1712,9 +1712,16 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <ul>
 <li><a href="#constituents-data-eda">2.1 Constituents Data EDA</a></li>
 <li><a href="#time-variables-and-action-in-the-constituents-dataset">2.1.1 Time variables and <code>action</code> in the <code>constituents</code> dataset</a></li>
-<li><a href="#the-time-series-of-sp500-constituents">2.1.2 The time series of S&amp;P500 constituents</a></li>
+<li><a href="#the-time-series-of-sp-500-constituents">2.1.2 The time series of S&amp;P 500 constituents</a></li>
 </ul></li>
-<li><a href="#implementing-the-roc-strategy">3. Implementing the ROC Strategy</a></li>
+<li><a href="#implementing-the-roc-strategy">3. Implementing the ROC Strategy</a>
+<ul>
+<li><a href="#calculating-the-200-day-roc">3.1 Calculating the 200-day ROC</a></li>
+<li><a href="#filtering-data-from-2010-onward">3.2 Filtering data from 2010 onward</a></li>
+<li><a href="#getting-the-data-into-a-long-format">3.3 Getting the data into a ‘long’ format</a></li>
+<li><a href="#consolidated-nested-data">3.4 Consolidated, Nested Data</a></li>
+<li><a href="#stock-selection-per-day">3.5 Stock Selection Per Day</a></li>
+</ul></li>
 </ul>
 </nav>
 </div>
@@ -1728,10 +1735,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 </div>
 <h2 id="introduction">1. Introduction</h2>
-<p>The task is to develop a backtest for a strategy that trades constituents of the S&amp;P500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis.</p>
-<p>It’s important to verify that it only selects stocks that are part of the S&amp;P500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.</p>
-<h3 id="the-sp500-index">1.1 The S&amp;P500 Index</h3>
-<p>The S&amp;P500 index…</p>
+<p>The task is to develop a backtest for a strategy that trades constituents of the S&amp;P 500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis.</p>
+<p>It’s important to verify that it only selects stocks that are part of the S&amp;P 500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.</p>
+<h3 id="the-sp-500-index">1.1 The S&amp;P 500 Index</h3>
+<p>The S&amp;P 500 index…</p>
 <p>it rebalances every…</p>
 <h3 id="the-strategy">1.2 The Strategy</h3>
 <p>The strategy consists of selecting the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis. Each day before the market opens, we look back on the Price ROCs of the previous close and buy the 10 stocks with the highest ROC.</p>
@@ -2021,7 +2028,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 <p>We get no rows, which means that the data is correct.</p>
 <h3 id="time-variables-and-action-in-the-constituents-dataset">2.1.1 Time variables and <code>action</code> in the <code>constituents</code> dataset</h3>
-<p>In this section we’ll create a time series that will contain, for each date, the constituents of the S&amp;P500 index. We’ll start by focusing on the <code>action</code> column.</p>
+<p>In this section we’ll create a time series that will contain, for each date, the constituents of the S&amp;P 500 index.</p>
 <p>Since we are focusing on time, we’ll add some time-related variables, such as:</p>
 <ul>
 <li><code>year</code>: The year of the <em>time series</em> <code>date</code>.</li>
@@ -2069,23 +2076,25 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>How are <code>actions</code> distributed along the data?</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span>
+<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> <span class="fu">count</span><span class="op">(</span><span class="va">action</span>, sort <span class="op">=</span> <span class="cn">T</span><span class="op">)</span>
 </code></pre>
 </div>
 <pre><code># A tibble: 4 x 2
   action         n
-* &lt;chr&gt;      &lt;int&gt;
-1 added       1137
-2 current      505
-3 historical 46110
-4 removed      636</code></pre>
+  &lt;chr&gt;      &lt;int&gt;
+1 historical 46110
+2 added       1137
+3 removed      636
+4 current      505</code></pre>
 </div>
 <p><code>current</code> appears to correspond to the index’s most recent constituents. We can check if this is the case by taking the unique values for the <code>date</code> variable when the <code>action</code> variable has the <em>current</em> value.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
-  <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;current&quot;</span>
-<span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">distinct</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;current&quot;</span>
+  <span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">distinct</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
 </code></pre>
 </div>
 <pre><code># A tibble: 1 x 1
@@ -2122,7 +2131,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 #   date_wday &lt;dbl&gt;, date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;,
 #   date_yday &lt;dbl&gt;, date_qid &lt;fct&gt;</code></pre>
 </div>
-<p>It’s clear that we don’t have the initial S&amp;P500 sample, but we <strong>could</strong> reverse engineer the constituents at each date. Let’s start by the final date <code>2020-12-31</code>:</p>
+<p>It’s clear that we don’t have the initial S&amp;P 500 sample, but we <strong>could</strong> reverse engineer the constituents at each date. Let’s start by the final date <code>2020-12-31</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituents</span> <span class="op">%&gt;%</span> 
@@ -2165,7 +2174,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <span class="fu">pivot_wider</span><span class="op">(</span>
     names_from <span class="op">=</span> <span class="va">action</span>,
     values_from <span class="op">=</span> <span class="va">name</span>
-    <span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">relocate</span><span class="op">(</span><span class="va">historical</span>, <span class="va">current</span>, <span class="va">added</span>, <span class="va">removed</span>, .after <span class="op">=</span> <span class="va">ticker</span><span class="op">)</span>
 
 <span class="va">constituents_wide</span>
@@ -2208,7 +2217,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 4            1          3</code></pre>
 </div>
 <p>Indeed, the only months were <code>historical</code> actions are not missing are <em>mod 3</em> months (i.e. the end of each quarter).</p>
-<p>This points to the fact that probably the <code>historical</code> value indicates the constituents per quarter on the S&amp;P500. We can further check the amount of <code>historical</code> values per quarter. The number should be around 500, of course.</p>
+<p>This points to the fact that probably the <code>historical</code> value indicates the constituents per quarter on the S&amp;P 500. We can further check the amount of <code>historical</code> values per quarter. The number should be around 500, of course.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituents_wide</span> <span class="op">%&gt;%</span> 
@@ -2361,7 +2370,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <pre><code>[1] TRUE</code></pre>
 </div>
 <p>Voilà! We did get a <code>TRUE</code> value when comparing the reverse-engineered approach and the mere <code>historical</code> values. This confirms that we can use the <code>historical</code> values for our constituents.</p>
-<h3 id="the-time-series-of-sp500-constituents">2.1.2 The time series of S&amp;P500 constituents</h3>
+<h3 id="the-time-series-of-sp-500-constituents">2.1.2 The time series of S&amp;P 500 constituents</h3>
 <p>We will now proceed to use these <code>historical</code> values for every day in the <code>closes.csv</code> dataset from <code>2010-01-01</code> through <code>2020-01-01</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2388,40 +2397,56 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <span class="co"># Nest the data</span>
   <span class="fu">nest</span><span class="op">(</span>constituents <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ticker</span>, <span class="va">historical</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">relocate</span><span class="op">(</span><span class="va">constituents</span>, .after <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+  <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  
+  <span class="co"># Uncomment in case we want to get the number of constituents per date</span>
+  <span class="co"># mutate(constituent_count = map_int(constituents, nrow)) %&gt;% </span>
+  <span class="fu"><a href="https://rdrr.io/r/base/identity.html">identity</a></span><span class="op">(</span><span class="op">)</span>
+
+<span class="va">constituents_nested</span>
 </code></pre>
 </div>
+<pre><code># A tibble: 48 x 2
+   date       constituents      
+   &lt;date&gt;     &lt;list&gt;            
+ 1 2009-03-31 &lt;tibble [500 x 2]&gt;
+ 2 2009-06-30 &lt;tibble [500 x 2]&gt;
+ 3 2009-09-30 &lt;tibble [500 x 2]&gt;
+ 4 2009-12-31 &lt;tibble [500 x 2]&gt;
+ 5 2010-03-31 &lt;tibble [494 x 2]&gt;
+ 6 2010-06-30 &lt;tibble [500 x 2]&gt;
+ 7 2010-09-30 &lt;tibble [500 x 2]&gt;
+ 8 2010-12-31 &lt;tibble [500 x 2]&gt;
+ 9 2011-03-31 &lt;tibble [500 x 2]&gt;
+10 2011-06-30 &lt;tibble [500 x 2]&gt;
+# ... with 38 more rows</code></pre>
 </div>
 <p>We can now left_join the datasets:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">constituents_joined</span> <span class="op">&lt;-</span> <span class="va">required_dates</span> <span class="op">%&gt;%</span> 
+<pre><code><span class="va">constituents_nested</span> <span class="op">&lt;-</span> <span class="va">required_dates</span> <span class="op">%&gt;%</span> 
   <span class="fu">left_join</span><span class="op">(</span><span class="va">constituents_nested</span>, by <span class="op">=</span> <span class="st">&quot;date&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">fill</span><span class="op">(</span><span class="va">constituents</span>, .direction <span class="op">=</span> <span class="st">&quot;up&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">add_ts_signature</span><span class="op">(</span>.date_col <span class="op">=</span> <span class="va">date</span><span class="op">)</span>
+  <span class="fu">fill</span><span class="op">(</span><span class="fu">contains</span><span class="op">(</span><span class="st">&quot;constituent&quot;</span><span class="op">)</span>, .direction <span class="op">=</span> <span class="st">&quot;up&quot;</span><span class="op">)</span>
 
-<span class="va">constituents_joined</span>
+<span class="va">constituents_nested</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 3,028 x 13
-   date       constituents date_year date_half date_quarter date_month
-   &lt;date&gt;     &lt;list&gt;           &lt;dbl&gt;     &lt;int&gt;        &lt;int&gt;      &lt;dbl&gt;
- 1 2009-01-02 &lt;tibble [50~      2009         1            1          1
- 2 2009-01-05 &lt;tibble [50~      2009         1            1          1
- 3 2009-01-06 &lt;tibble [50~      2009         1            1          1
- 4 2009-01-07 &lt;tibble [50~      2009         1            1          1
- 5 2009-01-08 &lt;tibble [50~      2009         1            1          1
- 6 2009-01-09 &lt;tibble [50~      2009         1            1          1
- 7 2009-01-12 &lt;tibble [50~      2009         1            1          1
- 8 2009-01-13 &lt;tibble [50~      2009         1            1          1
- 9 2009-01-14 &lt;tibble [50~      2009         1            1          1
-10 2009-01-15 &lt;tibble [50~      2009         1            1          1
-# ... with 3,018 more rows, and 7 more variables:
-#   date_month_label &lt;ord&gt;, date_day &lt;int&gt;, date_wday &lt;dbl&gt;,
-#   date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;, date_yday &lt;dbl&gt;,
-#   date_qid &lt;fct&gt;</code></pre>
+<pre><code># A tibble: 3,028 x 2
+   date       constituents      
+   &lt;date&gt;     &lt;list&gt;            
+ 1 2009-01-02 &lt;tibble [500 x 2]&gt;
+ 2 2009-01-05 &lt;tibble [500 x 2]&gt;
+ 3 2009-01-06 &lt;tibble [500 x 2]&gt;
+ 4 2009-01-07 &lt;tibble [500 x 2]&gt;
+ 5 2009-01-08 &lt;tibble [500 x 2]&gt;
+ 6 2009-01-09 &lt;tibble [500 x 2]&gt;
+ 7 2009-01-12 &lt;tibble [500 x 2]&gt;
+ 8 2009-01-13 &lt;tibble [500 x 2]&gt;
+ 9 2009-01-14 &lt;tibble [500 x 2]&gt;
+10 2009-01-15 &lt;tibble [500 x 2]&gt;
+# ... with 3,018 more rows</code></pre>
 </div>
-<p>Finally, we now have a time series with the corresponding composition of the S&amp;P 500 for each date.</p>
+<p>Finally! We now have a time series with the corresponding composition of the S&amp;P 500 for each date.</p>
 <h2 id="implementing-the-roc-strategy">3. Implementing the ROC Strategy</h2>
 <p>We proceed in the following way:</p>
 <p>First, import the data:</p>
@@ -2469,6 +2494,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 #   ROL &lt;dbl&gt;, ...</code></pre>
 </div>
 <p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code> for <code>1,084</code> different securities.</p>
+<h3 id="calculating-the-200-day-roc">3.1 Calculating the 200-day ROC</h3>
 <p>Secondly, calculate the 200-day ROC. We create a function to indicate the number of days (<code>ndays</code> argument) for the ROC calculation. This would be useful if we’d like to explore different days for the ROC.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2477,20 +2503,21 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   
   <span class="va">df</span> <span class="op">%&gt;%</span> 
     <span class="fu">mutate</span><span class="op">(</span>
-    <span class="fu">across</span><span class="op">(</span>
-      .cols <span class="op">=</span> <span class="op">-</span><span class="op">{</span><span class="op">{</span><span class="va">.date_col</span><span class="op">}</span><span class="op">}</span>,
-      .fns <span class="op">=</span> <span class="op">~</span> <span class="op">(</span><span class="va">.x</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/lag.html">lag</a></span><span class="op">(</span><span class="va">.x</span>, n <span class="op">=</span> <span class="va">.ndays</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>,
-      .names <span class="op">=</span> <span class="st">&quot;ROC_{.col}&quot;</span>
+      <span class="fu">across</span><span class="op">(</span>
+        .cols <span class="op">=</span> <span class="op">-</span><span class="op">{</span><span class="op">{</span><span class="va">.date_col</span><span class="op">}</span><span class="op">}</span>,
+        .fns <span class="op">=</span> <span class="op">~</span> <span class="op">(</span><span class="op">(</span><span class="va">.x</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/lag.html">lag</a></span><span class="op">(</span><span class="va">.x</span>, n <span class="op">=</span> <span class="va">.ndays</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>,
+        .names <span class="op">=</span> <span class="st">&quot;ROC_{.col}&quot;</span>
       <span class="op">)</span>
     <span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="co"># keep rows where at least one of the ROC columns is not NA</span>
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
-    <span class="fu">if_any</span><span class="op">(</span><span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span>, <span class="op">~</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span>
+    <span class="co"># keep rows where at least one of the ROC columns is not NA</span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+      <span class="fu">if_any</span><span class="op">(</span><span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span>, <span class="op">~</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span>
     <span class="op">)</span>
 <span class="op">}</span>
 </code></pre>
 </div>
 </div>
+<p>Now let’s use this function on our <code>closes.csv</code> data. This creates a column for each security that contains the <code>n-day</code> ROC for each security. The ROC numbers are in columns with the <em>ROC</em> prefix to easily identify them.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">roc_close</span> <span class="op">&lt;-</span> <span class="va">close_tbl</span> <span class="op">%&gt;%</span> 
@@ -2498,23 +2525,23 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <span class="fu">add_price_roc</span><span class="op">(</span>.date_col <span class="op">=</span> <span class="va">date</span>, 
                 .ndays <span class="op">=</span> <span class="fl">200</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="fu">relocate</span><span class="op">(</span><span class="va">date</span>, <span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span><span class="op">)</span>
-  
+
 <span class="va">roc_close</span>
 </code></pre>
 </div>
 <pre><code># A tibble: 5,596 x 2,169
    date       ROC_ZTS ROC_ZION ROC_ZBRA ROC_ZBH ROC_YUM ROC_XYL
    &lt;date&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
- 1 1998-10-16       0   0.0302  0.103         0   0.379       0
- 2 1998-10-19       0   0.0591  0.101         0   0.457       0
- 3 1998-10-20       0   0.0793  0.0890        0   0.580       0
- 4 1998-10-21       0   0.0986  0.136         0   0.631       0
- 5 1998-10-22       0   0.113   0.0235        0   0.620       0
- 6 1998-10-23       0   0.205   0.00446       0   0.715       0
- 7 1998-10-26       0   0.291   0.0796        0   0.688       0
- 8 1998-10-27       0   0.275   0.101         0   0.684       0
- 9 1998-10-28       0   0.267   0.0543        0   0.665       0
-10 1998-10-29       0   0.222   0.196         0   0.648       0
+ 1 1998-10-16       0     3.02   10.3         0    37.9       0
+ 2 1998-10-19       0     5.91   10.1         0    45.7       0
+ 3 1998-10-20       0     7.93    8.90        0    58.0       0
+ 4 1998-10-21       0     9.86   13.6         0    63.1       0
+ 5 1998-10-22       0    11.3     2.35        0    62.0       0
+ 6 1998-10-23       0    20.5     0.446       0    71.5       0
+ 7 1998-10-26       0    29.1     7.96        0    68.8       0
+ 8 1998-10-27       0    27.5    10.1         0    68.4       0
+ 9 1998-10-28       0    26.7     5.43        0    66.5       0
+10 1998-10-29       0    22.2    19.6         0    64.8       0
 # ... with 5,586 more rows, and 2,162 more variables: ROC_XRX &lt;dbl&gt;,
 #   ROC_XRAY &lt;dbl&gt;, ROC_XOM &lt;dbl&gt;, ROC_XLNX &lt;dbl&gt;, ROC_XEL &lt;dbl&gt;,
 #   ROC_WYNN &lt;dbl&gt;, ROC_WY &lt;dbl&gt;, ROC_WU &lt;dbl&gt;, ROC_WST &lt;dbl&gt;,
@@ -2542,23 +2569,154 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 #   ROC_SHW &lt;dbl&gt;, ROC_SEE &lt;dbl&gt;, ROC_SCHW &lt;dbl&gt;, ROC_SBUX &lt;dbl&gt;,
 #   ROC_SBAC &lt;dbl&gt;, ROC_RTX &lt;dbl&gt;, ROC_RSG &lt;dbl&gt;, ...</code></pre>
 </div>
+<h3 id="filtering-data-from-2010-onward">3.2 Filtering data from 2010 onward</h3>
+<p>Since the strategy will be implemented from 2010 onward, we can now filter out the data for previous years:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="co"># close_tbl %&gt;% skimr::skim_without_charts()</span>
+<pre><code><span class="va">roc_close</span> <span class="op">&lt;-</span> <span class="va">roc_close</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2008</span><span class="op">)</span>
 </code></pre>
 </div>
 </div>
-<p>We get the data into a long format (instead of the wide format with <code>1,085</code> columns).</p>
+<h3 id="getting-the-data-into-a-long-format">3.3 Getting the data into a ‘long’ format</h3>
+<p>We get the data into a long format (instead of the wide format with <code>2,169</code> columns). Also, a separation is made in two data frames: one for ROCs and the other one for prices. We call these <code>roc_long</code> and <code>close_long</code>, respectively.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="co"># close_long &lt;- close_tbl %&gt;% </span>
-<span class="co">#   pivot_longer(cols = -date, names_to = &quot;ticker&quot;, values_to = &quot;close&quot;) %&gt;% </span>
-<span class="co">#   arrange(ticker, date)</span>
-<span class="co"># </span>
-<span class="co"># close_long</span>
+<pre><code><span class="co"># Build a dataframe with ROC values</span>
+<span class="va">roc_long</span> <span class="op">&lt;-</span> <span class="va">roc_close</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="va">date</span>, <span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">pivot_longer</span><span class="op">(</span>
+    cols <span class="op">=</span> <span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span>,
+    names_to <span class="op">=</span> <span class="st">&quot;ticker&quot;</span>,
+    names_pattern <span class="op">=</span> <span class="st">&quot;_(.*)&quot;</span>,
+    values_to <span class="op">=</span> <span class="st">&quot;roc&quot;</span>
+  <span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">add_column</span><span class="op">(</span>data_type <span class="op">=</span> <span class="st">&quot;ROC&quot;</span><span class="op">)</span>
+
+<span class="va">roc_long</span>
 </code></pre>
 </div>
+<pre><code># A tibble: 3,282,352 x 4
+   date       ticker    roc data_type
+   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;    
+ 1 2009-01-02 ZTS      0    ROC      
+ 2 2009-01-02 ZION   -47.2  ROC      
+ 3 2009-01-02 ZBRA   -36.7  ROC      
+ 4 2009-01-02 ZBH    -44.7  ROC      
+ 5 2009-01-02 YUM    -11.6  ROC      
+ 6 2009-01-02 XYL      0    ROC      
+ 7 2009-01-02 XRX    -43.7  ROC      
+ 8 2009-01-02 XRAY   -19.7  ROC      
+ 9 2009-01-02 XOM     -3.30 ROC      
+10 2009-01-02 XLNX   -22.5  ROC      
+# ... with 3,282,342 more rows</code></pre>
 </div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="co"># Build a dataframe with price values</span>
+<span class="va">close_long</span> <span class="op">&lt;-</span> <span class="va">roc_close</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">pivot_longer</span><span class="op">(</span>
+    cols <span class="op">=</span> <span class="op">-</span><span class="va">date</span>,
+    names_to <span class="op">=</span> <span class="st">&quot;ticker&quot;</span>,
+    values_to <span class="op">=</span> <span class="st">&quot;price&quot;</span>
+  <span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">add_column</span><span class="op">(</span>data_type <span class="op">=</span> <span class="st">&quot;close&quot;</span><span class="op">)</span>
+
+<span class="va">close_long</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 3,282,352 x 4
+   date       ticker price data_type
+   &lt;date&gt;     &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;    
+ 1 2009-01-02 ZTS     31.0 close    
+ 2 2009-01-02 ZION    25   close    
+ 3 2009-01-02 ZBRA    21.0 close    
+ 4 2009-01-02 ZBH     41.8 close    
+ 5 2009-01-02 YUM     32   close    
+ 6 2009-01-02 XYL     24.2 close    
+ 7 2009-01-02 XRX     33.5 close    
+ 8 2009-01-02 XRAY    29.1 close    
+ 9 2009-01-02 XOM     81.6 close    
+10 2009-01-02 XLNX    18.4 close    
+# ... with 3,282,342 more rows</code></pre>
+</div>
+<p>We now nest both dataframes so we have a similar structure to the <code>constituents</code> data.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">roc_nested</span> <span class="op">&lt;-</span> <span class="va">roc_long</span> <span class="op">%&gt;%</span> 
+  <span class="fu">nest</span><span class="op">(</span>rocs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ticker</span>, <span class="va">roc</span>, <span class="va">data_type</span><span class="op">)</span><span class="op">)</span>
+  
+<span class="va">roc_nested</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 3,028 x 2
+   date       rocs                
+   &lt;date&gt;     &lt;list&gt;              
+ 1 2009-01-02 &lt;tibble [1,084 x 3]&gt;
+ 2 2009-01-05 &lt;tibble [1,084 x 3]&gt;
+ 3 2009-01-06 &lt;tibble [1,084 x 3]&gt;
+ 4 2009-01-07 &lt;tibble [1,084 x 3]&gt;
+ 5 2009-01-08 &lt;tibble [1,084 x 3]&gt;
+ 6 2009-01-09 &lt;tibble [1,084 x 3]&gt;
+ 7 2009-01-12 &lt;tibble [1,084 x 3]&gt;
+ 8 2009-01-13 &lt;tibble [1,084 x 3]&gt;
+ 9 2009-01-14 &lt;tibble [1,084 x 3]&gt;
+10 2009-01-15 &lt;tibble [1,084 x 3]&gt;
+# ... with 3,018 more rows</code></pre>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">close_nested</span> <span class="op">&lt;-</span> <span class="va">close_long</span> <span class="op">%&gt;%</span> 
+  <span class="fu">nest</span><span class="op">(</span>prices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ticker</span>, <span class="va">price</span>, <span class="va">data_type</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">close_nested</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 3,028 x 2
+   date       prices              
+   &lt;date&gt;     &lt;list&gt;              
+ 1 2009-01-02 &lt;tibble [1,084 x 3]&gt;
+ 2 2009-01-05 &lt;tibble [1,084 x 3]&gt;
+ 3 2009-01-06 &lt;tibble [1,084 x 3]&gt;
+ 4 2009-01-07 &lt;tibble [1,084 x 3]&gt;
+ 5 2009-01-08 &lt;tibble [1,084 x 3]&gt;
+ 6 2009-01-09 &lt;tibble [1,084 x 3]&gt;
+ 7 2009-01-12 &lt;tibble [1,084 x 3]&gt;
+ 8 2009-01-13 &lt;tibble [1,084 x 3]&gt;
+ 9 2009-01-14 &lt;tibble [1,084 x 3]&gt;
+10 2009-01-15 &lt;tibble [1,084 x 3]&gt;
+# ... with 3,018 more rows</code></pre>
+</div>
+<h3 id="consolidated-nested-data">3.4 Consolidated, Nested Data</h3>
+<p>Having all three nested dataframes (constituents, prices and rocs) we can consolidate everything into a single dataframe. This will be used to analyze the strategy.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">consolidated_nested</span> <span class="op">&lt;-</span> <span class="va">constituents_nested</span> <span class="op">%&gt;%</span> 
+  <span class="fu">left_join</span><span class="op">(</span><span class="va">close_nested</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">left_join</span><span class="op">(</span><span class="va">roc_nested</span><span class="op">)</span>
+
+<span class="va">consolidated_nested</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 3,028 x 4
+   date       constituents       prices             rocs              
+   &lt;date&gt;     &lt;list&gt;             &lt;list&gt;             &lt;list&gt;            
+ 1 2009-01-02 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 2 2009-01-05 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 3 2009-01-06 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 4 2009-01-07 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 5 2009-01-08 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 6 2009-01-09 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 7 2009-01-12 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 8 2009-01-13 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+ 9 2009-01-14 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+10 2009-01-15 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+# ... with 3,018 more rows</code></pre>
+</div>
+<p>In this <code>consolidated_nested</code> dataframe each row represents a single date. The advantage of this dataframe is that it contains the constituents, the prices, and rocs for each date.</p>
+<h3 id="stock-selection-per-day">3.5 Stock Selection Per Day</h3>
+<p>To code the stock selection, we start by defining the starting and ending dates.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">start_date</span> <span class="op">&lt;-</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2010-01-01&quot;</span><span class="op">)</span>
@@ -2566,6 +2724,22 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </code></pre>
 </div>
 </div>
+<p>Then, we can filter the <code>consolidated_nested</code> dataframe so we have data only for this range of dates.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">consolidated_nested</span> <span class="op">&lt;-</span> <span class="va">consolidated_nested</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">%&gt;%</span> <span class="fu">between</span><span class="op">(</span><span class="va">start_date</span> <span class="op">-</span> <span class="fl">1</span>, <span class="va">end_date</span><span class="op">)</span>
+  <span class="op">)</span>
+</code></pre>
+</div>
+</div>
+<p>We can now create a function for the following steps:</p>
+<ol type="1">
+<li>For each day, get the constituents of the S&amp;P 500.</li>
+<li>Then, rank each of those constituents by 200-day ROC.</li>
+<li>Choose the top 10 stocks.</li>
+<li>Get the corresponding weights for each stock.</li>
+</ol>
 <p>Delivery:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2594,7 +2768,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
 1 2010-01-01 AAPL      0.5</code></pre>
 </div>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
