@@ -1708,13 +1708,13 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#the-strategy">1.2 The Strategy</a></li>
 <li><a href="#the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</a></li>
 </ul></li>
-<li><a href="#data-comes-first">2. Data comes first</a>
+<li><a href="#constituents-come-first">2. Constituents come first</a>
 <ul>
 <li><a href="#constituents-data-eda">2.1 Constituents Data EDA</a></li>
 <li><a href="#time-variables-and-action-in-the-constituents-dataset">2.1.1 Time variables and <code>action</code> in the <code>constituents</code> dataset</a></li>
 <li><a href="#the-time-series-of-sp500-constituents">2.1.2 The time series of S&amp;P500 constituents</a></li>
-<li><a href="#data-wrangling">2.2 Data wrangling</a></li>
 </ul></li>
+<li><a href="#implementing-the-roc-strategy">3. Implementing the ROC Strategy</a></li>
 </ul>
 </nav>
 </div>
@@ -1740,7 +1740,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p><span class="math display">\[\begin{equation}
 \text{ROC}_{200d} = \left(\dfrac{P_t}{P_{t-200}}-1\right) \times 100
 \end{equation}\]</span></p>
-<h2 id="data-comes-first">2. Data comes first</h2>
+<h2 id="constituents-come-first">2. Constituents come first</h2>
 <p>We were provided with two datasets: <code>closes.csv</code> and <code>constituents.csv</code>. We will begin by exploring the latter.</p>
 <h3 id="constituents-data-eda">2.1 Constituents Data EDA</h3>
 <p>We import the <code>constituents.csv</code> data.</p>
@@ -2066,27 +2066,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </code></pre>
 </div>
 </div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents_ts</span> <span class="op">&lt;-</span> <span class="va">constituents</span> <span class="op">%&gt;%</span> 
-  
-  <span class="co"># Create time series signature</span>
-  <span class="fu">mutate</span><span class="op">(</span>
-    date_year        <span class="op">=</span> <span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
-    date_half        <span class="op">=</span> <span class="fu">semester</span><span class="op">(</span><span class="va">date</span>, with_year <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,
-    date_quarter     <span class="op">=</span> <span class="fu">quarter</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
-    date_month       <span class="op">=</span> <span class="fu">month</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
-    date_month_label <span class="op">=</span> <span class="fu">month</span><span class="op">(</span><span class="va">date</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
-    date_day         <span class="op">=</span> <span class="fu">day</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
-    date_wday        <span class="op">=</span> <span class="fu">wday</span><span class="op">(</span><span class="va">date</span>, week_start <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,
-    date_wday_label  <span class="op">=</span> <span class="fu">wday</span><span class="op">(</span><span class="va">date</span>, label <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
-    date_qday        <span class="op">=</span> <span class="fu">qday</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
-    date_yday        <span class="op">=</span> <span class="fu">yday</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
-    date_qid         <span class="op">=</span> <span class="fu">str_c</span><span class="op">(</span><span class="va">date_quarter</span>,<span class="st">&quot;Q&quot;</span>, <span class="fu">str_sub</span><span class="op">(</span><span class="va">date_year</span>, <span class="fl">3L</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">as_factor</span><span class="op">(</span><span class="op">)</span>
-  <span class="op">)</span>
-</code></pre>
-</div>
-</div>
 <p>How are <code>actions</code> distributed along the data?</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2095,7 +2074,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 <pre><code># A tibble: 4 x 2
   action         n
-  &lt;chr&gt;      &lt;int&gt;
+* &lt;chr&gt;      &lt;int&gt;
 1 added       1137
 2 current      505
 3 historical 46110
@@ -2175,7 +2154,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 <pre><code># A tibble: 2 x 2
   action         n
-  &lt;chr&gt;      &lt;int&gt;
+* &lt;chr&gt;      &lt;int&gt;
 1 current      505
 2 historical   505</code></pre>
 </div>
@@ -2233,136 +2212,65 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">constituents_wide</span> <span class="op">%&gt;%</span> 
-  <span class="fu">select</span><span class="op">(</span><span class="va">date_year</span>, <span class="va">date_quarter</span>, <span class="va">historical</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date_year</span> <span class="op">&gt;</span> <span class="fl">2000</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">date_year</span>, <span class="va">date_quarter</span><span class="op">)</span> <span class="op">%&gt;%</span>  
-  <span class="fu">nest</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">80</span><span class="op">)</span>
+  <span class="fu">select</span><span class="op">(</span><span class="va">date_year</span>, <span class="va">date_qid</span>, <span class="va">historical</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date_year</span> <span class="op">&gt;</span> <span class="fl">2008</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">historical</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">date_year</span>, <span class="va">date_qid</span><span class="op">)</span> <span class="op">%&gt;%</span>  
+  <span class="fu">nest</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>constituent_count <span class="op">=</span> <span class="fu">map_int</span><span class="op">(</span><span class="va">data</span>, <span class="va">nrow</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="va">data</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">45</span><span class="op">)</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 80 x 3
-# Groups:   date_year, date_quarter [80]
-   date_year date_quarter data              
-       &lt;dbl&gt;        &lt;int&gt; &lt;list&gt;            
- 1      2020            4 &lt;tibble [509 x 1]&gt;
- 2      2020            3 &lt;tibble [511 x 1]&gt;
- 3      2020            2 &lt;tibble [521 x 1]&gt;
- 4      2020            1 &lt;tibble [509 x 1]&gt;
- 5      2019            4 &lt;tibble [519 x 1]&gt;
- 6      2019            3 &lt;tibble [515 x 1]&gt;
- 7      2019            2 &lt;tibble [515 x 1]&gt;
- 8      2019            1 &lt;tibble [517 x 1]&gt;
- 9      2018            4 &lt;tibble [523 x 1]&gt;
-10      2018            3 &lt;tibble [511 x 1]&gt;
-11      2018            2 &lt;tibble [519 x 1]&gt;
-12      2018            1 &lt;tibble [513 x 1]&gt;
-13      2017            4 &lt;tibble [509 x 1]&gt;
-14      2017            3 &lt;tibble [525 x 1]&gt;
-15      2017            2 &lt;tibble [519 x 1]&gt;
-16      2017            1 &lt;tibble [525 x 1]&gt;
-17      2016            4 &lt;tibble [509 x 1]&gt;
-18      2016            3 &lt;tibble [513 x 1]&gt;
-19      2016            2 &lt;tibble [532 x 1]&gt;
-20      2016            1 &lt;tibble [522 x 1]&gt;
-21      2015            4 &lt;tibble [517 x 1]&gt;
-22      2015            3 &lt;tibble [524 x 1]&gt;
-23      2015            2 &lt;tibble [510 x 1]&gt;
-24      2015            1 &lt;tibble [518 x 1]&gt;
-25      2014            4 &lt;tibble [506 x 1]&gt;
-26      2014            3 &lt;tibble [513 x 1]&gt;
-27      2014            2 &lt;tibble [511 x 1]&gt;
-28      2014            1 &lt;tibble [504 x 1]&gt;
-29      2013            4 &lt;tibble [514 x 1]&gt;
-30      2013            3 &lt;tibble [508 x 1]&gt;
-31      2013            2 &lt;tibble [512 x 1]&gt;
-32      2013            1 &lt;tibble [504 x 1]&gt;
-33      2012            4 &lt;tibble [510 x 1]&gt;
-34      2012            3 &lt;tibble [510 x 1]&gt;
-35      2012            2 &lt;tibble [510 x 1]&gt;
-36      2012            1 &lt;tibble [506 x 1]&gt;
-37      2011            4 &lt;tibble [516 x 1]&gt;
-38      2011            3 &lt;tibble [504 x 1]&gt;
-39      2011            2 &lt;tibble [508 x 1]&gt;
-40      2011            1 &lt;tibble [510 x 1]&gt;
-41      2010            4 &lt;tibble [510 x 1]&gt;
-42      2010            3 &lt;tibble [504 x 1]&gt;
-43      2010            2 &lt;tibble [506 x 1]&gt;
-44      2010            1 &lt;tibble [506 x 1]&gt;
-45      2009            4 &lt;tibble [516 x 1]&gt;
-46      2009            3 &lt;tibble [508 x 1]&gt;
-47      2009            2 &lt;tibble [512 x 1]&gt;
-48      2009            1 &lt;tibble [518 x 1]&gt;
-49      2008            4 &lt;tibble [534 x 1]&gt;
-50      2008            3 &lt;tibble [518 x 1]&gt;
-51      2008            2 &lt;tibble [514 x 1]&gt;
-52      2008            1 &lt;tibble [506 x 1]&gt;
-53      2007            4 &lt;tibble [526 x 1]&gt;
-54      2007            3 &lt;tibble [516 x 1]&gt;
-55      2007            2 &lt;tibble [512 x 1]&gt;
-56      2007            1 &lt;tibble [522 x 1]&gt;
-57      2006            4 &lt;tibble [524 x 1]&gt;
-58      2006            3 &lt;tibble [508 x 1]&gt;
-59      2006            2 &lt;tibble [514 x 1]&gt;
-60      2006            1 &lt;tibble [516 x 1]&gt;
-61      2005            4 &lt;tibble [516 x 1]&gt;
-62      2005            3 &lt;tibble [516 x 1]&gt;
-63      2005            2 &lt;tibble [500 x 1]&gt;
-64      2005            1 &lt;tibble [504 x 1]&gt;
-65      2004            4 &lt;tibble [516 x 1]&gt;
-66      2004            3 &lt;tibble [506 x 1]&gt;
-67      2004            2 &lt;tibble [510 x 1]&gt;
-68      2004            1 &lt;tibble [506 x 1]&gt;
-69      2003            4 &lt;tibble [502 x 1]&gt;
-70      2003            3 &lt;tibble [506 x 1]&gt;
-71      2003            2 &lt;tibble [502 x 1]&gt;
-72      2003            1 &lt;tibble [508 x 1]&gt;
-73      2002            4 &lt;tibble [502 x 1]&gt;
-74      2002            3 &lt;tibble [524 x 1]&gt;
-75      2002            2 &lt;tibble [510 x 1]&gt;
-76      2002            1 &lt;tibble [510 x 1]&gt;
-77      2001            4 &lt;tibble [514 x 1]&gt;
-78      2001            3 &lt;tibble [520 x 1]&gt;
-79      2001            2 &lt;tibble [512 x 1]&gt;
-80      2001            1 &lt;tibble [512 x 1]&gt;</code></pre>
-</div>
-<div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> 
-  <span class="fu">group_by</span><span class="op">(</span><span class="va">date_qid</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu">arrange</span><span class="op">(</span><span class="va">date_year</span>, <span class="va">date_quarter</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
-    <span class="va">action</span> <span class="op">==</span> <span class="st">&quot;historical&quot;</span>,
-    <span class="va">date_year</span> <span class="op">&gt;</span> <span class="fl">2009</span>
-    <span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">count</span><span class="op">(</span><span class="va">action</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">arrange</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
-</code></pre>
-</div>
-<pre><code># A tibble: 44 x 3
-# Groups:   date_qid [44]
-   date_qid action         n
-   &lt;fct&gt;    &lt;chr&gt;      &lt;int&gt;
- 1 1Q10     historical   494
- 2 2Q14     historical   500
- 3 1Q14     historical   500
- 4 4Q13     historical   500
- 5 3Q13     historical   500
- 6 2Q13     historical   500
- 7 1Q13     historical   500
- 8 4Q12     historical   500
- 9 3Q12     historical   500
-10 2Q12     historical   500
-11 1Q12     historical   500
-12 4Q11     historical   500
-13 3Q11     historical   500
-14 2Q11     historical   500
-15 1Q11     historical   500
-16 4Q10     historical   500
-17 3Q10     historical   500
-18 2Q10     historical   500
-19 2Q15     historical   502
-20 1Q15     historical   502
-# ... with 24 more rows</code></pre>
+<pre><code># A tibble: 48 x 3
+# Groups:   date_year, date_qid [48]
+   date_year date_qid constituent_count
+       &lt;dbl&gt; &lt;fct&gt;                &lt;int&gt;
+ 1      2020 4Q20                   505
+ 2      2020 3Q20                   505
+ 3      2020 2Q20                   505
+ 4      2020 1Q20                   505
+ 5      2019 4Q19                   505
+ 6      2019 3Q19                   505
+ 7      2019 2Q19                   505
+ 8      2019 1Q19                   505
+ 9      2018 4Q18                   505
+10      2018 3Q18                   505
+11      2018 2Q18                   505
+12      2018 1Q18                   505
+13      2017 4Q17                   505
+14      2017 3Q17                   505
+15      2017 2Q17                   505
+16      2017 1Q17                   505
+17      2016 4Q16                   505
+18      2016 3Q16                   505
+19      2016 2Q16                   505
+20      2016 1Q16                   504
+21      2015 4Q15                   504
+22      2015 3Q15                   505
+23      2015 2Q15                   502
+24      2015 1Q15                   502
+25      2014 4Q14                   502
+26      2014 3Q14                   502
+27      2014 2Q14                   500
+28      2014 1Q14                   500
+29      2013 4Q13                   500
+30      2013 3Q13                   500
+31      2013 2Q13                   500
+32      2013 1Q13                   500
+33      2012 4Q12                   500
+34      2012 3Q12                   500
+35      2012 2Q12                   500
+36      2012 1Q12                   500
+37      2011 4Q11                   500
+38      2011 3Q11                   500
+39      2011 2Q11                   500
+40      2011 1Q11                   500
+41      2010 4Q10                   500
+42      2010 3Q10                   500
+43      2010 2Q10                   500
+44      2010 1Q10                   494
+45      2009 4Q09                   500
+# ... with 3 more rows</code></pre>
 </div>
 <p>Indeed the number is very close to 500 among all quarters.</p>
 <p>One last check we can perform before we can use the <code>historical</code> rows as our constituents has to do with the <code>current</code> rows. We can reverse engineer the 3Q20 constituents by starting from the 4Q20 (the <em>current</em> constituents).</p>
@@ -2383,6 +2291,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;        &lt;fct&gt;   
 1 2020-12-21 TSLA   Tesla Inc    4Q20    
 2 2020-10-12 VNT    Vontier Corp 4Q20    </code></pre>
+</div>
+<p>So TSLA and VNT were added in the 4Q20.</p>
+<div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">adds_drops</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">removed</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -2395,6 +2306,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 1 2020-12-21 AIV    Apartment Investment &amp; Management Co 4Q20    
 2 2020-10-12 NBL    Noble Energy Inc                     4Q20    </code></pre>
 </div>
+<p>NBL and AIV were removed in the 4Q20. Apparently, substituted by TSLA and VNT.</p>
 <p>We can now do the reverse action for the adds and the drops, respectively. Thus, the drops from 3Q20-4Q20 will become our adds and the adds will become our drops.</p>
 <p>We start by getting the adds needed to go from 4Q20 to 3Q20:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2417,8 +2329,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span class="va">drops_3Q</span> <span class="op">&lt;-</span> <span class="va">adds_drops</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">added</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">pull</span><span class="op">(</span><span class="va">added</span><span class="op">)</span>
+
+<span class="va">drops_3Q</span>
 </code></pre>
 </div>
+<pre><code>[1] &quot;Tesla Inc&quot;    &quot;Vontier Corp&quot;</code></pre>
 </div>
 <p>Finally, we get the constituents in 4Q20, include the adds and remove the drops, and compare against the constituents in 3Q20. We should get the same result.</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2445,18 +2360,18 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 <pre><code>[1] TRUE</code></pre>
 </div>
+<p>Voilà! We did get a <code>TRUE</code> value when comparing the reverse-engineered approach and the mere <code>historical</code> values. This confirms that we can use the <code>historical</code> values for our constituents.</p>
 <h3 id="the-time-series-of-sp500-constituents">2.1.2 The time series of S&amp;P500 constituents</h3>
-<p>We did get a <code>TRUE</code> value when comparing the reverse-engineered approach and the mere <code>historical</code> values. We will now proceed to use these <code>historical</code> values for every day in the <code>closes.csv</code> dataset from <code>2010-01-01</code> through <code>2020-01-01</code>.</p>
+<p>We will now proceed to use these <code>historical</code> values for every day in the <code>closes.csv</code> dataset from <code>2010-01-01</code> through <code>2020-01-01</code>.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="co"># Get the required dates from the closes.csv file</span>
 <span class="va">required_dates</span> <span class="op">&lt;-</span> <span class="fu">read_csv</span><span class="op">(</span>file <span class="op">=</span> <span class="st">&quot;data/closes.csv&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="co"># Focus on the date only</span>
   <span class="fu">select</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>date_year <span class="op">=</span> <span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   
   <span class="co"># Focus on 2010 or later</span>
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date_year</span> <span class="op">&gt;</span> <span class="fl">2009</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu">year</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">2008</span><span class="op">)</span>
 </code></pre>
 </div>
 </div>
@@ -2465,8 +2380,12 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="sourceCode">
 <pre><code><span class="va">constituents_nested</span> <span class="op">&lt;-</span> <span class="va">constituents_wide</span> <span class="op">%&gt;%</span> 
   <span class="co"># Focus on just the historicals and 2010 or later</span>
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date_year</span> <span class="op">&gt;</span> <span class="fl">2009</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">historical</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">select</span><span class="op">(</span><span class="va">date</span>, <span class="va">ticker</span>, <span class="va">historical</span>, <span class="fu">starts_with</span><span class="op">(</span><span class="st">&quot;date&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date_year</span> <span class="op">&gt;</span> <span class="fl">2008</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">historical</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  
+  <span class="co"># Just take the date, ticker, and historical columns</span>
+  <span class="fu">select</span><span class="op">(</span><span class="va">date</span>, <span class="va">ticker</span>, <span class="va">historical</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  
+  <span class="co"># Nest the data</span>
   <span class="fu">nest</span><span class="op">(</span>constituents <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ticker</span>, <span class="va">historical</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">relocate</span><span class="op">(</span><span class="va">constituents</span>, .after <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">arrange</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
@@ -2476,30 +2395,36 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>We can now left_join the datasets:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">required_dates</span> <span class="op">%&gt;%</span> 
-  <span class="fu">left_join</span><span class="op">(</span><span class="va">constituents_nested</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">fill</span><span class="op">(</span><span class="va">constituents</span>, <span class="fu">starts_with</span><span class="op">(</span><span class="st">&quot;date&quot;</span><span class="op">)</span>, .direction <span class="op">=</span> <span class="st">&quot;up&quot;</span><span class="op">)</span>
+<pre><code><span class="va">constituents_joined</span> <span class="op">&lt;-</span> <span class="va">required_dates</span> <span class="op">%&gt;%</span> 
+  <span class="fu">left_join</span><span class="op">(</span><span class="va">constituents_nested</span>, by <span class="op">=</span> <span class="st">&quot;date&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">fill</span><span class="op">(</span><span class="va">constituents</span>, .direction <span class="op">=</span> <span class="st">&quot;up&quot;</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">add_ts_signature</span><span class="op">(</span>.date_col <span class="op">=</span> <span class="va">date</span><span class="op">)</span>
+
+<span class="va">constituents_joined</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 2,776 x 13
-   date       date_year constituents date_half date_quarter date_month
-   &lt;date&gt;         &lt;dbl&gt; &lt;list&gt;           &lt;int&gt;        &lt;int&gt;      &lt;dbl&gt;
- 1 2010-01-04      2010 &lt;tibble [49~         1            1          3
- 2 2010-01-05      2010 &lt;tibble [49~         1            1          3
- 3 2010-01-06      2010 &lt;tibble [49~         1            1          3
- 4 2010-01-07      2010 &lt;tibble [49~         1            1          3
- 5 2010-01-08      2010 &lt;tibble [49~         1            1          3
- 6 2010-01-11      2010 &lt;tibble [49~         1            1          3
- 7 2010-01-12      2010 &lt;tibble [49~         1            1          3
- 8 2010-01-13      2010 &lt;tibble [49~         1            1          3
- 9 2010-01-14      2010 &lt;tibble [49~         1            1          3
-10 2010-01-15      2010 &lt;tibble [49~         1            1          3
-# ... with 2,766 more rows, and 7 more variables:
+<pre><code># A tibble: 3,028 x 13
+   date       constituents date_year date_half date_quarter date_month
+   &lt;date&gt;     &lt;list&gt;           &lt;dbl&gt;     &lt;int&gt;        &lt;int&gt;      &lt;dbl&gt;
+ 1 2009-01-02 &lt;tibble [50~      2009         1            1          1
+ 2 2009-01-05 &lt;tibble [50~      2009         1            1          1
+ 3 2009-01-06 &lt;tibble [50~      2009         1            1          1
+ 4 2009-01-07 &lt;tibble [50~      2009         1            1          1
+ 5 2009-01-08 &lt;tibble [50~      2009         1            1          1
+ 6 2009-01-09 &lt;tibble [50~      2009         1            1          1
+ 7 2009-01-12 &lt;tibble [50~      2009         1            1          1
+ 8 2009-01-13 &lt;tibble [50~      2009         1            1          1
+ 9 2009-01-14 &lt;tibble [50~      2009         1            1          1
+10 2009-01-15 &lt;tibble [50~      2009         1            1          1
+# ... with 3,018 more rows, and 7 more variables:
 #   date_month_label &lt;ord&gt;, date_day &lt;int&gt;, date_wday &lt;dbl&gt;,
 #   date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;, date_yday &lt;dbl&gt;,
 #   date_qid &lt;fct&gt;</code></pre>
 </div>
-<h3 id="data-wrangling">2.2 Data wrangling</h3>
+<p>Finally, we now have a time series with the corresponding composition of the S&amp;P 500 for each date.</p>
+<h2 id="implementing-the-roc-strategy">3. Implementing the ROC Strategy</h2>
+<p>We proceed in the following way:</p>
+<p>First, import the data:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="co"># Use read_csv() function to read the close data</span>
@@ -2544,18 +2469,78 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 #   ROL &lt;dbl&gt;, ...</code></pre>
 </div>
 <p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code> for <code>1,084</code> different securities.</p>
+<p>Secondly, calculate the 200-day ROC. We create a function to indicate the number of days (<code>ndays</code> argument) for the ROC calculation. This would be useful if we’d like to explore different days for the ROC.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="co"># roc_close &lt;- close_tbl %&gt;% </span>
-<span class="co">#   mutate(</span>
-<span class="co">#     across(</span>
-<span class="co">#       .cols = -date, </span>
-<span class="co">#       .fns = ~ (.x / lag(.x, n = 200L)) - 1,</span>
-<span class="co">#       .names = &quot;ROC_{.col}&quot;</span>
-<span class="co">#       )</span>
-<span class="co">#     )</span>
+<pre><code><span class="co"># This functions needs a data frame that has a date column and the rest of the columns must have the price of the securities.</span>
+<span class="va">add_price_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date_col</span>, <span class="va">.ndays</span><span class="op">)</span> <span class="op">{</span>
+  
+  <span class="va">df</span> <span class="op">%&gt;%</span> 
+    <span class="fu">mutate</span><span class="op">(</span>
+    <span class="fu">across</span><span class="op">(</span>
+      .cols <span class="op">=</span> <span class="op">-</span><span class="op">{</span><span class="op">{</span><span class="va">.date_col</span><span class="op">}</span><span class="op">}</span>,
+      .fns <span class="op">=</span> <span class="op">~</span> <span class="op">(</span><span class="va">.x</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/lag.html">lag</a></span><span class="op">(</span><span class="va">.x</span>, n <span class="op">=</span> <span class="va">.ndays</span><span class="op">)</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>,
+      .names <span class="op">=</span> <span class="st">&quot;ROC_{.col}&quot;</span>
+      <span class="op">)</span>
+    <span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="co"># keep rows where at least one of the ROC columns is not NA</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="fu">if_any</span><span class="op">(</span><span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span>, <span class="op">~</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span><span class="op">)</span>
+    <span class="op">)</span>
+<span class="op">}</span>
 </code></pre>
 </div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">roc_close</span> <span class="op">&lt;-</span> <span class="va">close_tbl</span> <span class="op">%&gt;%</span> 
+  <span class="co"># Add 200-day ROC</span>
+  <span class="fu">add_price_roc</span><span class="op">(</span>.date_col <span class="op">=</span> <span class="va">date</span>, 
+                .ndays <span class="op">=</span> <span class="fl">200</span><span class="op">)</span> <span class="op">%&gt;%</span>
+  <span class="fu">relocate</span><span class="op">(</span><span class="va">date</span>, <span class="fu">contains</span><span class="op">(</span><span class="st">&quot;ROC&quot;</span><span class="op">)</span><span class="op">)</span>
+  
+<span class="va">roc_close</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 5,596 x 2,169
+   date       ROC_ZTS ROC_ZION ROC_ZBRA ROC_ZBH ROC_YUM ROC_XYL
+   &lt;date&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+ 1 1998-10-16       0   0.0302  0.103         0   0.379       0
+ 2 1998-10-19       0   0.0591  0.101         0   0.457       0
+ 3 1998-10-20       0   0.0793  0.0890        0   0.580       0
+ 4 1998-10-21       0   0.0986  0.136         0   0.631       0
+ 5 1998-10-22       0   0.113   0.0235        0   0.620       0
+ 6 1998-10-23       0   0.205   0.00446       0   0.715       0
+ 7 1998-10-26       0   0.291   0.0796        0   0.688       0
+ 8 1998-10-27       0   0.275   0.101         0   0.684       0
+ 9 1998-10-28       0   0.267   0.0543        0   0.665       0
+10 1998-10-29       0   0.222   0.196         0   0.648       0
+# ... with 5,586 more rows, and 2,162 more variables: ROC_XRX &lt;dbl&gt;,
+#   ROC_XRAY &lt;dbl&gt;, ROC_XOM &lt;dbl&gt;, ROC_XLNX &lt;dbl&gt;, ROC_XEL &lt;dbl&gt;,
+#   ROC_WYNN &lt;dbl&gt;, ROC_WY &lt;dbl&gt;, ROC_WU &lt;dbl&gt;, ROC_WST &lt;dbl&gt;,
+#   ROC_WRK &lt;dbl&gt;, ROC_WRB &lt;dbl&gt;, ROC_WMT &lt;dbl&gt;, ROC_WMB &lt;dbl&gt;,
+#   ROC_WM &lt;dbl&gt;, ROC_WLTW &lt;dbl&gt;, ROC_WHR &lt;dbl&gt;, ROC_WFC &lt;dbl&gt;,
+#   ROC_WELL &lt;dbl&gt;, ROC_WEC &lt;dbl&gt;, ROC_WDC &lt;dbl&gt;, ROC_WBA &lt;dbl&gt;,
+#   ROC_WAT &lt;dbl&gt;, ROC_WAB &lt;dbl&gt;, ROC_VZ &lt;dbl&gt;, ROC_VTRS &lt;dbl&gt;,
+#   ROC_VTR &lt;dbl&gt;, ROC_VRTX &lt;dbl&gt;, ROC_VRSN &lt;dbl&gt;, ROC_VRSK &lt;dbl&gt;,
+#   ROC_VNT &lt;dbl&gt;, ROC_VNO &lt;dbl&gt;, ROC_VMC &lt;dbl&gt;, ROC_VLO &lt;dbl&gt;,
+#   ROC_VIAC &lt;dbl&gt;, ROC_VFC &lt;dbl&gt;, ROC_VAR &lt;dbl&gt;, ROC_V &lt;dbl&gt;,
+#   ROC_USB &lt;dbl&gt;, ROC_URI &lt;dbl&gt;, ROC_UPS &lt;dbl&gt;, ROC_UNP &lt;dbl&gt;,
+#   ROC_UNM &lt;dbl&gt;, ROC_UNH &lt;dbl&gt;, ROC_ULTA &lt;dbl&gt;, ROC_UHS &lt;dbl&gt;,
+#   ROC_UDR &lt;dbl&gt;, ROC_UAL &lt;dbl&gt;, ROC_UAA &lt;dbl&gt;, ROC_UA &lt;dbl&gt;,
+#   ROC_TYL &lt;dbl&gt;, ROC_TXT &lt;dbl&gt;, ROC_TXN &lt;dbl&gt;, ROC_TWTR &lt;dbl&gt;,
+#   ROC_TTWO &lt;dbl&gt;, ROC_TT &lt;dbl&gt;, ROC_TSN &lt;dbl&gt;, ROC_TSLA &lt;dbl&gt;,
+#   ROC_TSCO &lt;dbl&gt;, ROC_TRV &lt;dbl&gt;, ROC_TROW &lt;dbl&gt;, ROC_TPR &lt;dbl&gt;,
+#   ROC_TMUS &lt;dbl&gt;, ROC_TMO &lt;dbl&gt;, ROC_TJX &lt;dbl&gt;, ROC_TIF &lt;dbl&gt;,
+#   ROC_TGT &lt;dbl&gt;, ROC_TFX &lt;dbl&gt;, ROC_TFC &lt;dbl&gt;, ROC_TER &lt;dbl&gt;,
+#   ROC_TEL &lt;dbl&gt;, ROC_TDY &lt;dbl&gt;, ROC_TDG &lt;dbl&gt;, ROC_TAP &lt;dbl&gt;,
+#   ROC_T &lt;dbl&gt;, ROC_SYY &lt;dbl&gt;, ROC_SYK &lt;dbl&gt;, ROC_SYF &lt;dbl&gt;,
+#   ROC_SWKS &lt;dbl&gt;, ROC_SWK &lt;dbl&gt;, ROC_STZ &lt;dbl&gt;, ROC_STX &lt;dbl&gt;,
+#   ROC_STT &lt;dbl&gt;, ROC_STE &lt;dbl&gt;, ROC_SRE &lt;dbl&gt;, ROC_SPGI &lt;dbl&gt;,
+#   ROC_SPG &lt;dbl&gt;, ROC_SO &lt;dbl&gt;, ROC_SNPS &lt;dbl&gt;, ROC_SNA &lt;dbl&gt;,
+#   ROC_SLG &lt;dbl&gt;, ROC_SLB &lt;dbl&gt;, ROC_SJM &lt;dbl&gt;, ROC_SIVB &lt;dbl&gt;,
+#   ROC_SHW &lt;dbl&gt;, ROC_SEE &lt;dbl&gt;, ROC_SCHW &lt;dbl&gt;, ROC_SBUX &lt;dbl&gt;,
+#   ROC_SBAC &lt;dbl&gt;, ROC_RTX &lt;dbl&gt;, ROC_RSG &lt;dbl&gt;, ...</code></pre>
 </div>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2609,7 +2594,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
 1 2010-01-01 AAPL      0.5</code></pre>
 </div>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

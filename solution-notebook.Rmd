@@ -63,7 +63,7 @@ The Price ROC for 200 days is calculated as:
 \end{equation}
 
 
-## 2. Data comes first
+## 2. Constituents come first
 
 We were provided with two datasets: `closes.csv` and `constituents.csv`. We will begin by exploring the latter.
 
@@ -189,27 +189,6 @@ constituents_ts <- constituents %>%
 ```
 
 
-
-```{r}
-constituents_ts <- constituents %>% 
-  
-  # Create time series signature
-  mutate(
-    date_year        = year(date),
-    date_half        = semester(date, with_year = FALSE),
-    date_quarter     = quarter(date),
-    date_month       = month(date),
-    date_month_label = month(date, label = TRUE),
-    date_day         = day(date),
-    date_wday        = wday(date, week_start = 1),
-    date_wday_label  = wday(date, label = TRUE),
-    date_qday        = qday(date),
-    date_yday        = yday(date),
-    date_qid         = str_c(date_quarter,"Q", str_sub(date_year, 3L)) %>% as_factor()
-  )
-
-```
-
 How are `actions` distributed along the data?
 
 ```{r}
@@ -282,24 +261,15 @@ This points to the fact that probably the `historical` value indicates the const
 
 ```{r}
 constituents_wide %>% 
-  select(date_year, date_quarter, historical) %>% 
-  filter(date_year > 2000) %>% 
-  group_by(date_year, date_quarter) %>%  
-  nest() %>% print(n = 80)
+  select(date_year, date_qid, historical) %>% 
+  filter(date_year > 2008, !is.na(historical)) %>% 
+  group_by(date_year, date_qid) %>%  
+  nest() %>% 
+  mutate(constituent_count = map_int(data, nrow)) %>% 
+  select(-data) %>% 
+  print(n = 45)
 ```
 
-```{r}
-constituents_ts %>% 
-  group_by(date_qid) %>%
-  arrange(date_year, date_quarter) %>% 
-  filter(
-    action == "historical",
-    date_year > 2009
-    ) %>% 
-  count(action) %>% 
-  arrange(n) %>% 
-  print(n = 20)
-```
 
 Indeed the number is very close to 500 among all quarters.
 
@@ -316,11 +286,17 @@ adds_drops <- constituents_wide %>%
 adds_drops %>% 
   filter(!is.na(added)) %>% 
   select(-removed)
+```
 
+So TSLA and VNT were added in the 4Q20.
+
+```{r}
 adds_drops %>% 
   filter(!is.na(removed)) %>% 
   select(-added)
 ```
+
+NBL and AIV were removed in the 4Q20. Apparently, substituted by TSLA and VNT.
 
 
 We can now do the reverse action for the adds and the drops, respectively. Thus, the drops from 3Q20-4Q20 will become our adds and the adds will become our drops.
@@ -343,6 +319,8 @@ Next, we get the drops needed to go from 4Q20 to 3Q20:
 drops_3Q <- adds_drops %>% 
   filter(!is.na(added)) %>% 
   pull(added)
+
+drops_3Q
 ```
 
 
@@ -369,8 +347,11 @@ calculated_3Q20 <- calculated_3Q20[!calculated_3Q20 %in% drops_3Q] %>% sort()
 all.equal(constituents_3Q20, calculated_3Q20)
 ```
 
+Voilà! We did get a `TRUE` value when comparing the reverse-engineered approach and the mere `historical` values. This confirms that we can use the `historical` values for our constituents.
+
 ### 2.1.2 The time series of S&P500 constituents
-We did get a `TRUE` value when comparing the reverse-engineered approach and the mere `historical` values. We will now proceed to use these `historical` values for every day in the `closes.csv` dataset from `2010-01-01` through `2020-01-01`.
+
+We will now proceed to use these `historical` values for every day in the `closes.csv` dataset from `2010-01-01` through `2020-01-01`.
 
 
 ```{r}
@@ -378,10 +359,9 @@ We did get a `TRUE` value when comparing the reverse-engineered approach and the
 required_dates <- read_csv(file = "data/closes.csv") %>% 
   # Focus on the date only
   select(date) %>% 
-  mutate(date_year = year(date)) %>% 
   
   # Focus on 2010 or later
-  filter(date_year > 2009)
+  filter(year(date) > 2008)
 ```
 
 We now nest a data frame for each date in the `constituents` dataset that contains the S&P 500 constituents.
@@ -389,8 +369,12 @@ We now nest a data frame for each date in the `constituents` dataset that contai
 ```{r}
 constituents_nested <- constituents_wide %>% 
   # Focus on just the historicals and 2010 or later
-  filter(date_year > 2009, !is.na(historical)) %>% 
-  select(date, ticker, historical, starts_with("date")) %>% 
+  filter(date_year > 2008, !is.na(historical)) %>% 
+  
+  # Just take the date, ticker, and historical columns
+  select(date, ticker, historical) %>% 
+  
+  # Nest the data
   nest(constituents = c(ticker, historical)) %>% 
   relocate(constituents, .after = 1) %>% 
   arrange(date)
@@ -399,28 +383,24 @@ constituents_nested <- constituents_wide %>%
 We can now left_join the datasets:
 
 ```{r}
-required_dates %>% 
-  left_join(constituents_nested) %>% 
-  fill(constituents, starts_with("date"), .direction = "up")
+constituents_joined <- required_dates %>% 
+  left_join(constituents_nested, by = "date") %>% 
+  fill(constituents, .direction = "up") %>% 
+  add_ts_signature(.date_col = date)
+
+constituents_joined
 ```
 
 
+Finally, we now have a time series with the corresponding composition of the S&P 500 for each date.
 
 
 
+## 3. Implementing the ROC Strategy
 
+We proceed in the following way:
 
-
-
-
-
-
-
-
-
-
-
-### 2.2 Data wrangling
+First, import the data:
 
 ```{r}
 # Use read_csv() function to read the close data
@@ -432,15 +412,37 @@ close_tbl
 
 Apparently, we have daily closing data from `1997-12-31` through `2021-01-12` for `1,084` different securities.
 
+
+Secondly, calculate the 200-day ROC. We create a function to indicate the number of days (`ndays` argument) for the ROC calculation. This would be useful if we'd like to explore different days for the ROC.
+
 ```{r}
-# roc_close <- close_tbl %>% 
-#   mutate(
-#     across(
-#       .cols = -date, 
-#       .fns = ~ (.x / lag(.x, n = 200L)) - 1,
-#       .names = "ROC_{.col}"
-#       )
-#     )
+# This functions needs a data frame that has a date column and the rest of the columns must have the price of the securities.
+add_price_roc <- function(df, .date_col, .ndays) {
+  
+  df %>% 
+    mutate(
+    across(
+      .cols = -{{.date_col}},
+      .fns = ~ (.x / lag(.x, n = .ndays)) - 1,
+      .names = "ROC_{.col}"
+      )
+    ) %>% 
+  # keep rows where at least one of the ROC columns is not NA
+  filter(
+    if_any(contains("ROC"), ~ !is.na(.x))
+    )
+}
+```
+
+
+```{r}
+roc_close <- close_tbl %>% 
+  # Add 200-day ROC
+  add_price_roc(.date_col = date, 
+                .ndays = 200) %>%
+  relocate(date, contains("ROC"))
+  
+roc_close
 ```
 
 
