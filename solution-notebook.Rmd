@@ -119,7 +119,7 @@ constituents %>%
   filter(!is.na(contraticker) | !is.na(contraname)) 
 ```
 
-Indeed this is the case. We can see, for example, on the first row: TSLA is being added and replaced by AIV. On the next row we see the oppositve operation: AIV is being removed and substituted by TSLA.
+Indeed this is the case. We can see, for example, on the first row: TSLA is being added and replaced by AIV. On the next row we see the opposite operation: AIV is being removed and substituted by TSLA.
 
 
 * Another important check we must do is that there are no errors in the ticker, name relationship. That is, for every (ticker, name) pair there must be just one count per value-key pair.
