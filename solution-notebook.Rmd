@@ -29,7 +29,7 @@ library(skimr)
 
 ### Foreword on Reproducibility
 
-In order to run this code, you need to have installed R, RStudio, and install the following packages:
+In order to run this code, you need to have installed [R](https://cran.r-project.org/), ideally [RStudio](https://rstudio.com/products/rstudio/download/#download) too. Also, you would need to install the following packages:
 
 ```{r, eval=FALSE}
 # NOT RUN
