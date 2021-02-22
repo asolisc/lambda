@@ -19,11 +19,15 @@ editor_options:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(
+  echo = T,
+  warning = F)
+
 library(tidyverse)
 library(lubridate)
 library(glue)
 library(skimr)
+library(highcharter)
 ```
 
 
@@ -33,7 +37,7 @@ In order to run this notebook, you need to have [R](https://cran.r-project.org/)
 
 ```{r, eval=FALSE}
 # NOT RUN
-# install.packages(c("tidyverse", "lubridate", "glue", "skimr"))
+# install.packages(c("tidyverse", "lubridate", "glue", "skimr", "highcharter"))
 ```
 
 
@@ -765,11 +769,14 @@ analysis_dates %>% head()
 Then, we loop loop over that vector to use it on our `calculate_weights_wide()` function.
 
 ```{r, cache=T}
-# WARNING: This takes ~ 3 min to to run
+# WARNING: This takes ~ 3-4 min to to run
 strategy_weights <- analysis_dates %>% 
   map_dfr(.f = ~ calculate_weights_wide(consolidated_nested, .x, .top_n = 10))
 
 strategy_weights
+
+strategy_weights_long <- analysis_dates %>% 
+  map_dfr(.f = ~ calculate_weights(consolidated_nested, .x, .top_n = 10))
 ```
 
 
@@ -781,7 +788,67 @@ strategy_weights %>%
 ```
 
 
-### 3.7 Strategy Returns and NAV
+### 3.7 Time series of the Net Asset Value
+
+In order to get the time series for the NAV, we now focus on the daily returns of each selected stock.
+
+We first join the `returns_long` dataframe with the `strategy_weights_long` dataframe.
+
+```{r}
+weights_n_returns <- strategy_weights_long %>% rename(ticker = tickers) %>% 
+  left_join(returns_long, by = c("date", "ticker")) %>% 
+  select(-data_type)
+
+weights_n_returns
+```
+
+We then get the portfolio's return for each date:
+
+```{r}
+strategy_returns <- weights_n_returns %>% 
+  
+  # calculate the weighted return
+  mutate(weighted_return = weights * return) %>% 
+  group_by(date) %>% 
+  
+  # sum the returns for each date
+  summarise(strategy_return = sum(weighted_return)) %>% 
+  
+  # get a column with the NAV multiplier.
+  mutate(multiplier = if_else(date == analysis_dates[[1]], 1, strategy_return + 1),
+         cumulative_multiplier = cumprod(multiplier))
+
+strategy_returns
+```
+
+Now, after defining the initial capital with the `starting_capital` variable, we see how that amount evolves by following this strategy.
+
+```{r}
+starting_capital <- 100
+
+strategy_nav <- strategy_returns %>% 
+  mutate(nav = starting_capital * cumulative_multiplier) %>% 
+  select(date, strategy_return, nav)
+
+strategy_nav
+```
+
+Let's finish off with a nice plot of the strategy's NAV:
+
+```{r}
+strategy_nav %>% 
+  hchart("line",
+         hcaes(date, nav),
+         color = "#002C54") %>% 
+         # color = "#258039") %>% 
+    hc_title(
+    text = "200-day ROC Strategy's Net Asset Value"
+    ) %>% 
+  hc_add_theme(hc_theme_538())
+```
+
+One final step would be to compare these results against holding the whole S&P 500.
+
 
 
 
@@ -804,12 +871,3 @@ tibble(
   nav = 1e6
 )
 ```
-
-```{r}
-tibble(
-  date = ymd("2010-01-01"),
-  ticker = "AAPL",
-  weight = .5
-)
-```
-
