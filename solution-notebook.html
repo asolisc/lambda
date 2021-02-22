@@ -1721,7 +1721,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#getting-the-data-into-a-long-format">3.3 Getting the data into a ‘long’ format</a></li>
 <li><a href="#consolidated-nested-data">3.4 Consolidated, Nested Data</a></li>
 <li><a href="#stock-selection-per-day">3.5 Stock Selection Per Day</a></li>
-<li><a href="#strategy-implementation-and-output">3.6 Strategy Implementation and Output</a></li>
+<li><a href="#strategy-weights">3.6 Strategy Weights</a></li>
+<li><a href="#strategy-returns-and-nav">3.7 Strategy Returns and NAV</a></li>
 </ul></li>
 <li><a href="#strategy-assumptions">4. Strategy Assumptions</a></li>
 </ul>
@@ -2109,30 +2110,30 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>Let’s inspect the data for the first date <code>1957-03-04</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">constituents_wide</span> <span class="op">%&gt;%</span> 
+<pre><code><span class="va">constituents_ts</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
     <span class="va">date</span> <span class="op">==</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;1957-03-04&quot;</span><span class="op">)</span>
   <span class="op">)</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 97 x 20
-   date       ticker historical current added removed contraticker
-   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt;       
- 1 1957-03-04 WWY    &lt;NA&gt;       &lt;NA&gt;    Wrig~ &lt;NA&gt;    &lt;NA&gt;        
- 2 1957-03-04 WNDXQ  &lt;NA&gt;       &lt;NA&gt;    Winn~ &lt;NA&gt;    &lt;NA&gt;        
- 3 1957-03-04 WLA    &lt;NA&gt;       &lt;NA&gt;    Warn~ &lt;NA&gt;    &lt;NA&gt;        
- 4 1957-03-04 WGL    &lt;NA&gt;       &lt;NA&gt;    Wgl ~ &lt;NA&gt;    &lt;NA&gt;        
- 5 1957-03-04 WAB    &lt;NA&gt;       &lt;NA&gt;    &lt;NA&gt;  Westin~ GT          
- 6 1957-03-04 VO1    &lt;NA&gt;       &lt;NA&gt;    Seag~ &lt;NA&gt;    &lt;NA&gt;        
- 7 1957-03-04 USG    &lt;NA&gt;       &lt;NA&gt;    Usg ~ &lt;NA&gt;    &lt;NA&gt;        
- 8 1957-03-04 UNP    &lt;NA&gt;       &lt;NA&gt;    Unio~ &lt;NA&gt;    &lt;NA&gt;        
- 9 1957-03-04 UK1    &lt;NA&gt;       &lt;NA&gt;    Unio~ &lt;NA&gt;    &lt;NA&gt;        
-10 1957-03-04 UCC1   &lt;NA&gt;       &lt;NA&gt;    Unio~ &lt;NA&gt;    &lt;NA&gt;        
-# ... with 87 more rows, and 13 more variables: contraname &lt;chr&gt;,
-#   note &lt;chr&gt;, date_year &lt;dbl&gt;, date_half &lt;int&gt;, date_quarter &lt;int&gt;,
-#   date_month &lt;dbl&gt;, date_month_label &lt;ord&gt;, date_day &lt;int&gt;,
-#   date_wday &lt;dbl&gt;, date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;,
-#   date_yday &lt;dbl&gt;, date_qid &lt;fct&gt;</code></pre>
+<pre><code># A tibble: 97 x 18
+   date       action ticker name  contraticker contraname note 
+   &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;
+ 1 1957-03-04 added  WWY    Wrig~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 2 1957-03-04 added  WNDXQ  Winn~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 3 1957-03-04 added  WLA    Warn~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 4 1957-03-04 added  WGL    Wgl ~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 5 1957-03-04 remov~ WAB    West~ GT           Goodyear ~ &lt;NA&gt; 
+ 6 1957-03-04 added  VO1    Seag~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 7 1957-03-04 added  USG    Usg ~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 8 1957-03-04 added  UNP    Unio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+ 9 1957-03-04 added  UK1    Unio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+10 1957-03-04 added  UCC1   Unio~ &lt;NA&gt;         &lt;NA&gt;       &lt;NA&gt; 
+# ... with 87 more rows, and 11 more variables: date_year &lt;dbl&gt;,
+#   date_half &lt;int&gt;, date_quarter &lt;int&gt;, date_month &lt;dbl&gt;,
+#   date_month_label &lt;ord&gt;, date_day &lt;int&gt;, date_wday &lt;dbl&gt;,
+#   date_wday_label &lt;ord&gt;, date_qday &lt;dbl&gt;, date_yday &lt;dbl&gt;,
+#   date_qid &lt;fct&gt;</code></pre>
 </div>
 <p>It’s clear that we don’t have the initial S&amp;P 500 sample, but we <strong>could</strong> reverse engineer the constituents at each date. Let’s start by the final date <code>2020-12-31</code>:</p>
 <div class="layout-chunk" data-layout="l-body">
@@ -2790,8 +2791,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>To code the stock selection, we start by defining the starting and ending dates.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">start_date</span> <span class="op">&lt;-</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2010-01-01&quot;</span><span class="op">)</span>
-<span class="va">end_date</span> <span class="op">&lt;-</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-01-01&quot;</span><span class="op">)</span>
+<pre><code><span class="va">start_date</span> <span class="op">&lt;-</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2009-12-31&quot;</span><span class="op">)</span>
+<span class="va">end_date</span> <span class="op">&lt;-</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-01-02&quot;</span><span class="op">)</span>
 </code></pre>
 </div>
 </div>
@@ -2966,7 +2967,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </code></pre>
 </div>
 </div>
-<p>Again, we test the function:</p>
+<p>Again, we test the functions:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="fu">calculate_weights</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span>, .top_n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
@@ -3001,31 +3002,61 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 #   weight_7 &lt;dbl&gt;, weight_8 &lt;dbl&gt;, weight_9 &lt;dbl&gt;, weight_10 &lt;dbl&gt;</code></pre>
 </div>
 <p>This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&amp;P 500 constituents, ranking those by 200-day ROC and equally weighing the top ‘n’.</p>
-<h3 id="strategy-implementation-and-output">3.6 Strategy Implementation and Output</h3>
-<p>We are finally ready to implement the aforementioned strategy on each day. We proceed by getting a vector of dates for which we want to implement the strategy (defined by the <code>start_date</code> and <code>end_date</code> variables), and then loop over that vector to use it on our <code>calculate_weights()</code> function.</p>
+<h3 id="strategy-weights">3.6 Strategy Weights</h3>
+<p>We are finally ready to implement the aforementioned strategy on each day. We proceed by getting a vector of dates for which we want to implement the strategy (defined by the <code>start_date</code> and <code>end_date</code> variables).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">analysis_dates</span> <span class="op">&lt;-</span> <span class="va">consolidated_nested</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">slice</span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">pull</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
+<pre><code><span class="co"># Extract the dates needed for the analysis</span>
+<span class="va">analysis_dates</span> <span class="op">&lt;-</span> <span class="va">consolidated_nested</span> <span class="op">%&gt;%</span> 
+  <span class="fu">select</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span>
+    <span class="va">date</span> <span class="op">%&gt;%</span> <span class="fu">between</span><span class="op">(</span><span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2009-12-31&quot;</span><span class="op">)</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2020-01-02&quot;</span><span class="op">)</span><span class="op">)</span>
+    <span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">pull</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
 
-<span class="va">analysis_dates</span> <span class="op">%&gt;%</span> 
-  <span class="fu">map</span><span class="op">(</span>.f <span class="op">=</span> <span class="op">~</span> <span class="fu">calculate_weights</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="va">.x</span>, .top_n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span>
+<span class="va">analysis_dates</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span>
 </code></pre>
 </div>
-<pre><code>[[1]]
-# A tibble: 10 x 3
-   date       tickers weights
-   &lt;date&gt;     &lt;chr&gt;     &lt;dbl&gt;
- 1 2010-01-06 CBRE        0.1
- 2 2010-01-06 FITB        0.1
- 3 2010-01-06 GNW         0.1
- 4 2010-01-06 JBL         0.1
- 5 2010-01-06 MEE         0.1
- 6 2010-01-06 ODP         0.1
- 7 2010-01-06 TGNA        0.1
- 8 2010-01-06 THC         0.1
- 9 2010-01-06 WYND        0.1
-10 2010-01-06 XL1         0.1</code></pre>
+<pre><code>[1] &quot;2009-12-31&quot; &quot;2010-01-04&quot; &quot;2010-01-05&quot; &quot;2010-01-06&quot; &quot;2010-01-07&quot;
+[6] &quot;2010-01-08&quot;</code></pre>
 </div>
+<p>Then, we loop loop over that vector to use it on our <code>calculate_weights_wide()</code> function.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="co"># WARNING: This takes ~ 3 min to to run</span>
+<span class="va">strategy_weights</span> <span class="op">&lt;-</span> <span class="va">analysis_dates</span> <span class="op">%&gt;%</span> 
+  <span class="fu">map_dfr</span><span class="op">(</span>.f <span class="op">=</span> <span class="op">~</span> <span class="fu">calculate_weights_wide</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="va">.x</span>, .top_n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span>
+
+<span class="va">strategy_weights</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 2,518 x 21
+   date       ticker_1 ticker_2 ticker_3 ticker_4 ticker_5 ticker_6
+   &lt;date&gt;     &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   
+ 1 2009-12-31 CBRE     F        FITB     GNW      JBL      ODP     
+ 2 2010-01-04 CBRE     F        FITB     GNW      JBL      MEE     
+ 3 2010-01-05 CBRE     F        FITB     GNW      JBL      ODP     
+ 4 2010-01-06 CBRE     FITB     GNW      JBL      MEE      ODP     
+ 5 2010-01-07 CBRE     F        FITB     GNW      JBL      MEE     
+ 6 2010-01-08 CBRE     F        FITB     GNW      JBL      MEE     
+ 7 2010-01-11 DD       F        FITB     GNW      JBL      MEE     
+ 8 2010-01-12 DD       F        FITB     GNW      ISRG     MEE     
+ 9 2010-01-13 DD       F        FITB     GNW      IP       MEE     
+10 2010-01-14 F        FITB     GNW      LNC      MEE      ODP     
+# ... with 2,508 more rows, and 14 more variables: ticker_7 &lt;chr&gt;,
+#   ticker_8 &lt;chr&gt;, ticker_9 &lt;chr&gt;, ticker_10 &lt;chr&gt;, weight_1 &lt;dbl&gt;,
+#   weight_2 &lt;dbl&gt;, weight_3 &lt;dbl&gt;, weight_4 &lt;dbl&gt;, weight_5 &lt;dbl&gt;,
+#   weight_6 &lt;dbl&gt;, weight_7 &lt;dbl&gt;, weight_8 &lt;dbl&gt;, weight_9 &lt;dbl&gt;,
+#   weight_10 &lt;dbl&gt;</code></pre>
+</div>
+<p>Now, let’s write the <code>weights.csv</code> file to the <code>/output</code> directory.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">strategy_weights</span> <span class="op">%&gt;%</span> 
+  <span class="fu">write_excel_csv</span><span class="op">(</span><span class="st">&quot;output/weights.csv&quot;</span><span class="op">)</span>
+</code></pre>
+</div>
+</div>
+<h3 id="strategy-returns-and-nav">3.7 Strategy Returns and NAV</h3>
 <h1 id="strategy-assumptions">4. Strategy Assumptions</h1>
 <p>The execution of this strategy, as presented on this solution, relies upon the following assumptions:</p>
 <ol type="1">
@@ -3062,7 +3093,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
 1 2010-01-01 AAPL      0.5</code></pre>
 </div>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

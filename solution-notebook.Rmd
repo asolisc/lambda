@@ -214,7 +214,7 @@ Indeed, the only date where a _current_ value appears is `r constituents_ts %>% 
 Let's inspect the data for the first date `1957-03-04`:
 
 ```{r}
-constituents_wide %>% 
+constituents_ts %>% 
   filter(
     date == ymd("1957-03-04")
   )
@@ -578,8 +578,8 @@ In this `consolidated_nested` dataframe each row represents a single date. The a
 To code the stock selection, we start by defining the starting and ending dates.
 
 ```{r}
-start_date <- ymd("2010-01-01")
-end_date <- ymd("2020-01-01")
+start_date <- ymd("2009-12-31")
+end_date <- ymd("2020-01-02")
 ```
 
 Then, we can filter the `consolidated_nested` dataframe so we have data around this range of dates.
@@ -733,7 +733,7 @@ calculate_weights_wide <- function(df, .date, .top_n = 10L) {
 ```
 
 
-Again, we test the function:
+Again, we test the functions:
 
 ```{r}
 calculate_weights(consolidated_nested, ymd("2019-12-31"), .top_n = 10)
@@ -746,22 +746,42 @@ calculate_weights_wide(consolidated_nested, ymd("2019-12-31"), .top_n = 10)
 
 This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&P 500 constituents, ranking those by 200-day ROC and equally weighing the top 'n'.
 
-### 3.6 Strategy Implementation and Output
+### 3.6 Strategy Weights
 
-We are finally ready to implement the aforementioned strategy on each day. We proceed by getting a vector of dates for which we want to implement the strategy (defined by the `start_date` and `end_date` variables), and then loop over that vector to use it on our `calculate_weights()` function.
-
+We are finally ready to implement the aforementioned strategy on each day. We proceed by getting a vector of dates for which we want to implement the strategy (defined by the `start_date` and `end_date` variables).
 
 
 ```{r}
-analysis_dates <- consolidated_nested %>% select(date) %>% slice(10) %>% pull(date)
+# Extract the dates needed for the analysis
+analysis_dates <- consolidated_nested %>% 
+  select(date) %>% 
+  filter(
+    date %>% between(ymd("2009-12-31"), ymd("2020-01-02"))
+    ) %>% pull(date)
 
-analysis_dates %>% 
-  map(.f = ~ calculate_weights(consolidated_nested, .x, .top_n = 10))
+analysis_dates %>% head()
+```
 
+Then, we loop loop over that vector to use it on our `calculate_weights_wide()` function.
+
+```{r, cache=T}
+# WARNING: This takes ~ 3 min to to run
+strategy_weights <- analysis_dates %>% 
+  map_dfr(.f = ~ calculate_weights_wide(consolidated_nested, .x, .top_n = 10))
+
+strategy_weights
 ```
 
 
+Now, let's write the `weights.csv` file to the `/output` directory.
 
+```{r}
+strategy_weights %>% 
+  write_excel_csv("output/weights.csv")
+```
+
+
+### 3.7 Strategy Returns and NAV
 
 
 
