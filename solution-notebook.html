@@ -1722,6 +1722,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#consolidated-nested-data">3.4 Consolidated, Nested Data</a></li>
 <li><a href="#stock-selection-per-day">3.5 Stock Selection Per Day</a></li>
 </ul></li>
+<li><a href="#strategy-assumptions">4. Strategy Assumptions</a></li>
 </ul>
 </nav>
 </div>
@@ -1738,8 +1739,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>The task is to develop a backtest for a strategy that trades constituents of the S&amp;P 500 index from January 1st, 2010 through January 1st, 2020. Each day the strategy selects the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis.</p>
 <p>It’s important to verify that it only selects stocks that are part of the S&amp;P 500 index at each moment in time, as these change every quarter. A file should be generated with the values of the equity curve (Net Asset Value) over time and a file of weights or positions where you can see the stocks that were selected each day.</p>
 <h3 id="the-sp-500-index">1.1 The S&amp;P 500 Index</h3>
-<p>The S&amp;P 500 index…</p>
-<p>it rebalances every…</p>
+<p>The S&amp;P 500 index is one of the most-widely known indexes in finance. According to S&amp;P Dow Jones Indices: ‘the S&amp;P 500® is widely regarded as the best single gauge of large-cap U.S. equities. There is over USD 11.2 trillion indexed or benchmarked to the index, with indexed assets comprising approximately USD 4.6 trillion of this total. The index includes 500 leading companies and covers approximately 80% of available market capitalization.’</p>
+<p>The index measures the performance of the large-cap segment of the market. Considered to be a proxy of the U.S. equity market, the index is composed of 500 constituent companies.</p>
+<p>According to the <a href="https://www.spglobal.com/spdji/en/documents/methodologies/methodology-sp-us-indices.pdf">S&amp;P 500’s methodology</a>, the index is weighted by float-adjusted market capitalization and is rebalanced on a quarterly basis.</p>
 <h3 id="the-strategy">1.2 The Strategy</h3>
 <p>The strategy consists of selecting the 10 stocks with the highest <a href="https://www.investopedia.com/terms/p/pricerateofchange.asp">Price Rate of Change Indicator (ROC)</a> and buys them on an equally-weighted basis. Each day before the market opens, we look back on the Price ROCs of the previous close and buy the 10 stocks with the highest ROC.</p>
 <h3 id="the-price-rate-of-change-roc">1.3 The Price Rate of Change (ROC)</h3>
@@ -2043,7 +2045,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><code>yday</code>: The day of the year.</li>
 <li><code>qid</code>: The quarter’s ID.</li>
 </ul>
-<p>All variables will have the <code>date_</code> prefix so they are easy to identify. Since we can use this creation of variables for later, we create the <code>add_ts_signature</code> function (so we can <em>recycle</em> the code).</p>
+<p>All variables will have the <code>date_</code> prefix so they are easy to identify. Since we can use this creation of variables for later, we create the <code>add_ts_signature()</code> function (so we can <em>recycle</em> the code).</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">add_ts_signature</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date_col</span><span class="op">)</span> <span class="op">{</span>
@@ -2495,7 +2497,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </div>
 <p>Apparently, we have daily closing data from <code>1997-12-31</code> through <code>2021-01-12</code> for <code>1,084</code> different securities.</p>
 <h3 id="calculating-the-200-day-roc">3.1 Calculating the 200-day ROC</h3>
-<p>Secondly, calculate the 200-day ROC. We create a function to indicate the number of days (<code>ndays</code> argument) for the ROC calculation. This would be useful if we’d like to explore different days for the ROC.</p>
+<p>Secondly, calculate the 200-day ROC. To achieve this, we create the <code>add_price_roc()</code> function, which takes an <code>ndays</code> argument to indicate the number of days for the ROC calculation. This would be useful if we’d like to explore different days for the ROC.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="co"># This functions needs a data frame that has a date column and the rest of the columns must have the price of the securities.</span>
@@ -2694,24 +2696,26 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="sourceCode">
 <pre><code><span class="va">consolidated_nested</span> <span class="op">&lt;-</span> <span class="va">constituents_nested</span> <span class="op">%&gt;%</span> 
   <span class="fu">left_join</span><span class="op">(</span><span class="va">close_nested</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">left_join</span><span class="op">(</span><span class="va">roc_nested</span><span class="op">)</span>
+  <span class="fu">left_join</span><span class="op">(</span><span class="va">roc_nested</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>row_id <span class="op">=</span> <span class="fu">row_number</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">relocate</span><span class="op">(</span><span class="va">row_id</span>, <span class="fu">everything</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">consolidated_nested</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 3,028 x 4
-   date       constituents       prices             rocs              
-   &lt;date&gt;     &lt;list&gt;             &lt;list&gt;             &lt;list&gt;            
- 1 2009-01-02 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 2 2009-01-05 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 3 2009-01-06 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 4 2009-01-07 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 5 2009-01-08 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 6 2009-01-09 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 7 2009-01-12 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 8 2009-01-13 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
- 9 2009-01-14 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
-10 2009-01-15 &lt;tibble [500 x 2]&gt; &lt;tibble [1,084 x ~ &lt;tibble [1,084 x ~
+<pre><code># A tibble: 3,028 x 5
+   row_id date       constituents      prices          rocs           
+    &lt;int&gt; &lt;date&gt;     &lt;list&gt;            &lt;list&gt;          &lt;list&gt;         
+ 1      1 2009-01-02 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 2      2 2009-01-05 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 3      3 2009-01-06 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 4      4 2009-01-07 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 5      5 2009-01-08 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 6      6 2009-01-09 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 7      7 2009-01-12 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 8      8 2009-01-13 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+ 9      9 2009-01-14 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
+10     10 2009-01-15 &lt;tibble [500 x 2~ &lt;tibble [1,084~ &lt;tibble [1,084~
 # ... with 3,018 more rows</code></pre>
 </div>
 <p>In this <code>consolidated_nested</code> dataframe each row represents a single date. The advantage of this dataframe is that it contains the constituents, the prices, and rocs for each date.</p>
@@ -2728,18 +2732,166 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">consolidated_nested</span> <span class="op">&lt;-</span> <span class="va">consolidated_nested</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">%&gt;%</span> <span class="fu">between</span><span class="op">(</span><span class="va">start_date</span> <span class="op">-</span> <span class="fl">1</span>, <span class="va">end_date</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">%&gt;%</span> <span class="fu">between</span><span class="op">(</span><span class="va">start_date</span> <span class="op">-</span> <span class="fl">1</span>, <span class="va">end_date</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>
   <span class="op">)</span>
 </code></pre>
 </div>
 </div>
-<p>We can now create a function for the following steps:</p>
+<p>We then execute the following steps:</p>
 <ol type="1">
 <li>For each day, get the constituents of the S&amp;P 500.</li>
-<li>Then, rank each of those constituents by 200-day ROC.</li>
-<li>Choose the top 10 stocks.</li>
+</ol>
+<p>For this purpose, we create the <code>extract_constituents()</code> function:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">extract_constituents</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">df</span> <span class="op">%&gt;%</span> 
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">extraction_date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">select</span><span class="op">(</span><span class="va">row_id</span>, <span class="va">date</span>, <span class="va">constituents</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">unnest</span><span class="op">(</span>cols <span class="op">=</span> <span class="va">constituents</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">pull</span><span class="op">(</span><span class="va">ticker</span><span class="op">)</span>
+<span class="op">}</span>
+</code></pre>
+</div>
+</div>
+<p>We can test it for any date and show just the first 6 tickers:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="fu">extract_constituents</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code>[1] &quot;ZTS&quot;  &quot;ZION&quot; &quot;ZBRA&quot; &quot;ZBH&quot;  &quot;YUM&quot;  &quot;XYL&quot; </code></pre>
+</div>
+<ol start="2" type="1">
+<li>Then, rank each of those constituents by their previous closing 200-day ROC. Choose the top 10 stocks.</li>
+</ol>
+<p>For this purpose, we create two functions:</p>
+<ul>
+<li><p>the <code>show_top10_roc()</code> function, which shows us the top 10 tickers ranked by ROC, for any given date.</p></li>
+<li><p>the <code>extract_top10_roc()</code> function, which extracts the top 10 tickers ranked by ROC, for any given date.</p></li>
+</ul>
+<p>Here’s the <code>show_top10_roc()</code> function:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">show_top10_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span><span class="op">)</span> <span class="op">{</span>
+  
+  <span class="co"># Get the ID for the previous close</span>
+  <span class="va">previous_row</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">%&gt;%</span> 
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">extraction_date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">pull</span><span class="op">(</span><span class="va">row_id</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>
+  
+  <span class="co"># Proceed to get the top 10 tickers</span>
+  <span class="va">df</span> <span class="op">%&gt;%</span> 
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">row_id</span> <span class="op">==</span> <span class="va">previous_row</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">select</span><span class="op">(</span><span class="va">row_id</span>, <span class="va">date</span>, <span class="va">rocs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">unnest</span><span class="op">(</span>cols <span class="op">=</span> <span class="va">rocs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    
+    <span class="co"># Filter to focus on the S&amp;P 500 constituents. Use extract_constituents function</span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">ticker</span> <span class="op">%in%</span> <span class="fu">extract_constituents</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    
+    <span class="co"># Get the top 10, as ordered by ROC</span>
+    <span class="fu">slice_max</span><span class="op">(</span>order_by <span class="op">=</span> <span class="va">roc</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
+  
+<span class="op">}</span>
+</code></pre>
+</div>
+</div>
+<p>Let’s test this function for a given date:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="fu">show_top10_roc</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 10 x 5
+   row_id date       ticker   roc data_type
+    &lt;int&gt; &lt;date&gt;     &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;    
+ 1   2767 2019-12-30 AMD     95.4 ROC      
+ 2   2767 2019-12-30 TGT     68.1 ROC      
+ 3   2767 2019-12-30 QRVO    66.8 ROC      
+ 4   2767 2019-12-30 HWM     62.6 ROC      
+ 5   2767 2019-12-30 MKTX    60.4 ROC      
+ 6   2767 2019-12-30 LRCX    60.4 ROC      
+ 7   2767 2019-12-30 AAPL    56.6 ROC      
+ 8   2767 2019-12-30 QCOM    56.2 ROC      
+ 9   2767 2019-12-30 LDOS    56.1 ROC      
+10   2767 2019-12-30 RMD     54.0 ROC      </code></pre>
+</div>
+<p>Indeed it shows the top 10 ROC tickers for the previous close.</p>
+<p>Now here’s the <code>extract_top10_roc()</code> function:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">extract_top10_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span><span class="op">)</span> <span class="op">{</span>
+  
+  <span class="fu">show_top10_roc</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">pull</span><span class="op">(</span><span class="va">ticker</span><span class="op">)</span>
+<span class="op">}</span>
+</code></pre>
+</div>
+</div>
+<p>Again, we take it for a spin:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="fu">extract_top10_roc</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code> [1] &quot;AMD&quot;  &quot;TGT&quot;  &quot;QRVO&quot; &quot;HWM&quot;  &quot;MKTX&quot; &quot;LRCX&quot; &quot;AAPL&quot; &quot;QCOM&quot; &quot;LDOS&quot;
+[10] &quot;RMD&quot; </code></pre>
+</div>
+<p>It works perfectly; we got the exact same tickers as with the <code>show_top10_roc()</code> function.</p>
+<ol start="3" type="1">
 <li>Get the corresponding weights for each stock.</li>
 </ol>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">chosen_tickers</span> <span class="op">&lt;-</span> <span class="fu">extract_top10_roc</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span><span class="op">)</span>
+
+<span class="fu">tibble</span><span class="op">(</span>
+  date <span class="op">=</span> <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span>,
+  tickers <span class="op">=</span> <span class="fu">extract_constituents</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span><span class="op">)</span>,
+  weights <span class="op">=</span> <span class="fu">if_else</span><span class="op">(</span>
+    <span class="va">tickers</span> <span class="op">%in%</span> <span class="va">chosen_tickers</span>, 
+    <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">chosen_tickers</span><span class="op">)</span>, <span class="co"># equally weighted portfolio</span>
+    <span class="fl">0</span>                           <span class="co"># if ticker is not chose, assign 0 weight</span>
+  <span class="op">)</span>
+<span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">arrange</span><span class="op">(</span><span class="op">-</span><span class="va">weights</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 505 x 3
+   date       tickers weights
+   &lt;date&gt;     &lt;chr&gt;     &lt;dbl&gt;
+ 1 2019-12-31 TGT         0.1
+ 2 2019-12-31 RMD         0.1
+ 3 2019-12-31 QRVO        0.1
+ 4 2019-12-31 QCOM        0.1
+ 5 2019-12-31 MKTX        0.1
+ 6 2019-12-31 LRCX        0.1
+ 7 2019-12-31 LDOS        0.1
+ 8 2019-12-31 HWM         0.1
+ 9 2019-12-31 AMD         0.1
+10 2019-12-31 AAPL        0.1
+11 2019-12-31 ZTS         0  
+12 2019-12-31 ZION        0  
+13 2019-12-31 ZBRA        0  
+14 2019-12-31 ZBH         0  
+15 2019-12-31 YUM         0  
+16 2019-12-31 XYL         0  
+17 2019-12-31 XRX         0  
+18 2019-12-31 XRAY        0  
+19 2019-12-31 XOM         0  
+20 2019-12-31 XLNX        0  
+# ... with 485 more rows</code></pre>
+</div>
+<h1 id="strategy-assumptions">4. Strategy Assumptions</h1>
+<p>The execution of this strategy, as presented on this solution, relies upon the following assumptions:</p>
+<ol type="1">
+<li>No trading friction (i.e. there are no commissions and taxes).</li>
+<li>The closing price of the previous day is equal to the opening price of the current day.</li>
+<li>The investor can buy fractions of shares.</li>
+</ol>
+<p>The code can be further improved to ‘relax’ all of the previous assumptions and reflect a ‘more realistic’ implementation.</p>
 <p>Delivery:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
@@ -2768,7 +2920,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
 1 2010-01-01 AAPL      0.5</code></pre>
 </div>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

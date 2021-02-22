@@ -46,9 +46,12 @@ It's important to verify that it only selects stocks that are part of the S&P 50
 
 ### 1.1 The S&P 500 Index
 
-The S&P 500 index...
+The S&P 500 index is one of the most-widely known indexes in finance. According to S&P Dow Jones Indices: 'the S&P 500® is widely regarded as the best single gauge of large-cap U.S. equities. There is over USD 11.2 trillion indexed or benchmarked to the index, with indexed assets comprising approximately USD 4.6 trillion of this total. The index includes 500 leading companies and covers approximately 80% of available market capitalization.'
 
-it rebalances every...
+The index measures the performance of the large-cap segment of the market. Considered to be a proxy of the U.S. equity market, the index is composed of 500 constituent companies.
+
+
+According to the [S&P 500's methodology](https://www.spglobal.com/spdji/en/documents/methodologies/methodology-sp-us-indices.pdf), the index is weighted by float-adjusted market capitalization and is rebalanced on a quarterly basis.
 
 ### 1.2 The Strategy
 
@@ -161,7 +164,7 @@ Since we are focusing on time, we'll add some time-related variables, such as:
 -   `yday`: The day of the year.
 -   `qid`: The quarter's ID.
 
-All variables will have the `date_` prefix so they are easy to identify. Since we can use this creation of variables for later, we create the `add_ts_signature` function (so we can _recycle_ the code).
+All variables will have the `date_` prefix so they are easy to identify. Since we can use this creation of variables for later, we create the `add_ts_signature()` function (so we can _recycle_ the code).
 
 ```{r}
 add_ts_signature <- function(df, .date_col) {
@@ -420,7 +423,7 @@ Apparently, we have daily closing data from `1997-12-31` through `2021-01-12` fo
 
 ### 3.1 Calculating the 200-day ROC
 
-Secondly, calculate the 200-day ROC. We create a function to indicate the number of days (`ndays` argument) for the ROC calculation. This would be useful if we'd like to explore different days for the ROC.
+Secondly, calculate the 200-day ROC. To achieve this, we create the `add_price_roc()` function, which takes an `ndays` argument to indicate the number of days for the ROC calculation. This would be useful if we'd like to explore different days for the ROC.
 
 ```{r}
 # This functions needs a data frame that has a date column and the rest of the columns must have the price of the securities.
@@ -520,7 +523,9 @@ Having all three nested dataframes (constituents, prices and rocs) we can consol
 ```{r}
 consolidated_nested <- constituents_nested %>% 
   left_join(close_nested) %>% 
-  left_join(roc_nested)
+  left_join(roc_nested) %>% 
+  mutate(row_id = row_number()) %>% 
+  relocate(row_id, everything())
 
 consolidated_nested
 ```
@@ -541,17 +546,132 @@ Then, we can filter the `consolidated_nested` dataframe so we have data only for
 
 ```{r}
 consolidated_nested <- consolidated_nested %>% 
-  filter(date %>% between(start_date - 1, end_date)
+  filter(date %>% between(start_date - 1, end_date + 1)
   )
 ```
 
 
-We can now create a function for the following steps:
+We then execute the following steps:
 
 1. For each day, get the constituents of the S&P 500.
-2. Then, rank each of those constituents by 200-day ROC.
-3. Choose the top 10 stocks.
-4. Get the corresponding weights for each stock.
+
+For this purpose, we create the `extract_constituents()` function:
+
+```{r}
+extract_constituents <- function(df, extraction_date) {
+  df %>% 
+    filter(date == extraction_date) %>% 
+    select(row_id, date, constituents) %>% 
+    unnest(cols = constituents) %>% 
+    pull(ticker)
+}
+```
+
+We can test it for any date and show just the first 6 tickers:
+
+```{r}
+extract_constituents(consolidated_nested, ymd("2019-12-31")) %>% 
+  head()
+```
+
+
+2. Then, rank each of those constituents by their previous closing 200-day ROC. Choose the top 10 stocks.
+
+For this purpose, we create two functions:
+
+- the `show_top10_roc()` function, which shows us the top 10 tickers ranked by ROC, for any given date.
+
+- the `extract_top10_roc()` function, which extracts the top 10 tickers ranked by ROC, for any given date.
+
+Here's the `show_top10_roc()` function:
+
+```{r}
+show_top10_roc <- function(df, extraction_date) {
+  
+  # Get the ID for the previous close
+  previous_row <- df %>% 
+    filter(date == extraction_date) %>% 
+    pull(row_id) - 1
+  
+  # Proceed to get the top 10 tickers
+  df %>% 
+    filter(row_id == previous_row) %>% 
+    select(row_id, date, rocs) %>% 
+    unnest(cols = rocs) %>% 
+    
+    # Filter to focus on the S&P 500 constituents. Use extract_constituents function
+    filter(ticker %in% extract_constituents(df, extraction_date)) %>% 
+    
+    # Get the top 10, as ordered by ROC
+    slice_max(order_by = roc, n = 10)
+  
+}
+```
+
+Let's test this function for a given date:
+
+```{r}
+show_top10_roc(consolidated_nested, ymd("2019-12-31"))
+```
+
+Indeed it shows the top 10 ROC tickers for the previous close.
+
+Now here's the `extract_top10_roc()` function:
+
+```{r}
+extract_top10_roc <- function(df, extraction_date) {
+  
+  show_top10_roc(df, extraction_date) %>% 
+    pull(ticker)
+}
+```
+
+Again, we take it for a spin:
+
+```{r}
+extract_top10_roc(consolidated_nested, ymd("2019-12-31"))
+```
+
+
+It works perfectly; we got the exact same tickers as with the `show_top10_roc()` function.
+
+
+3. Get the corresponding weights for each stock.
+
+```{r}
+chosen_tickers <- extract_top10_roc(consolidated_nested, ymd("2019-12-31"))
+
+tibble(
+  date = ymd("2019-12-31"),
+  tickers = extract_constituents(consolidated_nested, ymd("2019-12-31")),
+  weights = if_else(
+    tickers %in% chosen_tickers, 
+    1 / length(chosen_tickers), # equally weighted portfolio
+    0                           # if ticker is not chose, assign 0 weight
+  )
+) %>% 
+  arrange(-weights) %>% 
+  print(n = 20)
+```
+
+
+
+
+
+
+
+
+
+# 4. Strategy Assumptions
+
+The execution of this strategy, as presented on this solution, relies upon the following assumptions:
+
+1. No trading friction (i.e. there are no commissions and taxes).
+2. The closing price of the previous day is equal to the opening price of the current day.
+3. The investor can buy fractions of shares.
+
+
+The code can be further improved to 'relax' all of the previous assumptions and reflect a 'more realistic' implementation.
 
 Delivery:
 
