@@ -864,8 +864,7 @@ strategy_nav %>%
 
 One final step would be to compare these results against holding the whole S&P 500.
 
-We can download daily returns for the S&P 500 from January 02, 1986 through June 29, 2018. The data comes from [this Kaggle webpage](https://www.kaggle.com/pdquant/sp500-daily-19862018).
-
+We can download daily returns for the S&P 500 from January 02, 1986 through June 29, 2018. The data comes from [this Kaggle webpage](https://www.kaggle.com/pdquant/sp500-daily-19862018). We note that this dataset has a year and half less data than the provided dataset. However, it's still useful to contrast the strategies.
 
 ```{r}
 # Import csv file
@@ -927,11 +926,45 @@ spx_nav %>%
          # color = "#002C54") %>% 
          color = "#258039") %>%
     hc_title(
-    text = "200-day ROC Strategy's Net Asset Value"
+    text = "Holding the S&P 500 Index"
     ) %>% 
   hc_add_theme(hc_theme_538())
 ```
 
+To see both strategies side to side, we can substract the NAV from each other:
+
+```{r}
+relative_nav <- spx_nav %>% 
+  rename(spx_nav = nav) %>% 
+  left_join(strategy_nav %>% rename(strat_nav = nav), by = "date") %>% 
+  mutate(nav_diff = strat_nav - spx_nav)
+```
+
+In the chart below, we plot the difference between the NAV's growth produced by the 200-day ROC strategy against holding the S&P 500 index. We can see that, for a brief window of time, holding the index was more profitable. However, after 10 years, the 200-day ROC strategy clearly beats the index.
+
+```{r}
+relative_nav %>% 
+  hchart("line",
+         hcaes(date, nav_diff),
+         # color = "#002C54") %>% 
+         color = "#258039") %>%
+    hc_title(
+    text = "NAV difference between strategies"
+    ) %>% 
+  hc_add_theme(hc_theme_538())
+```
+
+We could also visualize both NAVs. Below we provide a chart where we do just that. The blue line corresponds to the strategy's NAV, while the red line corresponds to the S&P 500 index. The x-axis denotes the amount of days after the strategy is implemented.
+
+```{r}
+highchart(type = "chart") %>% 
+  hc_add_series(relative_nav$spx_nav) %>% 
+  hc_add_series(relative_nav$strat_nav) %>% 
+      hc_title(
+    text = "Contrast of NAVs between S&P500 index and ROC strategy"
+    ) %>% 
+  hc_add_theme(hc_theme_538())
+```
 
 
 # 4. Conclusions

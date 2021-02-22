@@ -8,11 +8,12 @@ library(lubridate)
 library(glue)
 library(skimr)
 library(highcharter)
+library(janitor)
 
 
 ## ---- eval=FALSE-----------------------------------------
 ## # NOT RUN
-## # install.packages(c("tidyverse", "lubridate", "glue", "skimr", "highcharter"))
+## # install.packages(c("tidyverse", "lubridate", "glue", "skimr", "highcharter", "janitor"))
 
 
 ## --------------------------------------------------------
@@ -511,7 +512,8 @@ strategy_weights %>%
 
 
 ## --------------------------------------------------------
-weights_n_returns <- strategy_weights_long %>% rename(ticker = tickers) %>% 
+weights_n_returns <- strategy_weights_long %>% 
+  rename(ticker = tickers) %>% 
   left_join(returns_long, by = c("date", "ticker")) %>% 
   select(-data_type)
 
@@ -529,7 +531,9 @@ strategy_returns <- weights_n_returns %>%
   summarise(strategy_return = sum(weighted_return)) %>% 
   
   # get a column with the NAV multiplier.
-  mutate(multiplier = if_else(date == analysis_dates[[1]], 1, strategy_return + 1),
+  mutate(multiplier = if_else(date == analysis_dates[[1]], 
+                              1, 
+                              strategy_return + 1),
          cumulative_multiplier = cumprod(multiplier))
 
 strategy_returns
@@ -558,6 +562,95 @@ strategy_nav %>%
          # color = "#258039") %>% 
     hc_title(
     text = "200-day ROC Strategy's Net Asset Value"
+    ) %>% 
+  hc_add_theme(hc_theme_538())
+
+
+## --------------------------------------------------------
+# Import csv file
+spx <- read_csv("data/spx.csv")
+
+
+spx_tbl <- spx %>% 
+  
+  mutate(
+    
+  # Parse the date to a "date" type of object
+    date = parse_date(date, format = "%d-%b-%y"),
+    
+  # Calculate the returns
+  returns = (close / lag(close)) - 1
+  ) %>% 
+  
+  # Filter out the first value
+  filter(!is.na(returns)) %>%
+  
+  # Filter for dates in the analysis
+  filter(date %in% analysis_dates) %>% 
+  
+  # Get lower-case and no-space names
+  clean_names()
+
+spx_tbl
+
+
+## --------------------------------------------------------
+spx_multiplier <- spx_tbl %>% 
+  group_by(date) %>% 
+  
+  # sum the returns for each date
+  summarise(sp500_return = sum(returns)) %>% 
+  
+  # get a column with the NAV multiplier.
+  mutate(multiplier = if_else(date == analysis_dates[[1]], 
+                              1, 
+                              sp500_return + 1),
+         cumulative_multiplier = cumprod(multiplier))
+
+spx_nav <-  spx_multiplier %>% 
+  mutate(nav = starting_capital * cumulative_multiplier) %>% 
+  select(date, sp500_return, nav)
+
+spx_nav
+
+
+## --------------------------------------------------------
+spx_nav %>% 
+  hchart("line",
+         hcaes(date, nav),
+         # color = "#002C54") %>% 
+         color = "#258039") %>%
+    hc_title(
+    text = "Holding the S&P 500 Index"
+    ) %>% 
+  hc_add_theme(hc_theme_538())
+
+
+## --------------------------------------------------------
+relative_nav <- spx_nav %>% 
+  rename(spx_nav = nav) %>% 
+  left_join(strategy_nav %>% rename(strat_nav = nav), by = "date") %>% 
+  mutate(nav_diff = strat_nav - spx_nav)
+
+
+## --------------------------------------------------------
+relative_nav %>% 
+  hchart("line",
+         hcaes(date, nav_diff),
+         # color = "#002C54") %>% 
+         color = "#258039") %>%
+    hc_title(
+    text = "NAV difference between strategies"
+    ) %>% 
+  hc_add_theme(hc_theme_538())
+
+
+## --------------------------------------------------------
+highchart(type = "chart") %>% 
+  hc_add_series(relative_nav$spx_nav) %>% 
+  hc_add_series(relative_nav$strat_nav) %>% 
+      hc_title(
+    text = "Contrast of NAVs between S&P500 index and ROC strategy"
     ) %>% 
   hc_add_theme(hc_theme_538())
 
