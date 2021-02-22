@@ -421,7 +421,7 @@ close_tbl
 
 Apparently, we have daily closing data from `1997-12-31` through `2021-01-12` for `1,084` different securities.
 
-### 3.1 Calculating the 200-day ROC
+### 3.1 Calculating the 200-day ROC and daily returns
 
 Secondly, calculate the 200-day ROC. To achieve this, we create the `add_price_roc()` function, which takes an `ndays` argument to indicate the number of days for the ROC calculation. This would be useful if we'd like to explore different days for the ROC.
 
@@ -446,12 +446,23 @@ add_price_roc <- function(df, .date_col, .ndays) {
 
 Now let's use this function on our `closes.csv` data. This creates a column for each security that contains the `n-day` ROC for each security. The ROC numbers are in columns with the _ROC_ prefix to easily identify them.
 
+We also calculate the daily returns. The return numbers are located in columns with the _return_ prefix to easily identify them.
+
 ```{r}
 roc_close <- close_tbl %>% 
   # Add 200-day ROC
   add_price_roc(.date_col = date, 
                 .ndays = 200) %>%
-  relocate(date, contains("ROC"))
+  relocate(date, contains("ROC")) %>% 
+  
+  # Add the returns
+  mutate(
+    across(
+      .cols = -c(date, contains("ROC")),
+      .fns = ~ (.x / lag(.x)) - 1,
+      .names = "return_{.col}"
+    )
+  )
 
 roc_close
 ```
@@ -467,7 +478,7 @@ roc_close <- roc_close %>%
 
 ### 3.3 Getting the data into a 'long' format
 
-We get the data into a long format (instead of the wide format with `2,169` columns). Also, a separation is made in two data frames: one for ROCs and the other one for prices. We call these `roc_long` and `close_long`, respectively.
+We get the data into a long format (instead of the wide format with `2,169` columns). Also, a separation is made in three data frames: one for ROCs, one for prices, and the other one for returns We call these `roc_long`, `close_long`, and `returns_long`` respectively.
 
 
 ```{r}
@@ -490,6 +501,7 @@ roc_long
 # Build a dataframe with price values
 close_long <- roc_close %>% 
   select(-contains("ROC")) %>% 
+  select(-contains("return")) %>% 
   pivot_longer(
     cols = -date,
     names_to = "ticker",
@@ -500,7 +512,25 @@ close_long <- roc_close %>%
 close_long
 ```
 
-We now nest both dataframes so we have a similar structure to the `constituents` data.
+
+```{r}
+# Build a dataframe with ROC values
+returns_long <- roc_close %>% 
+  select(date, contains("return")) %>% 
+  pivot_longer(
+    cols = contains("return"),
+    names_to = "ticker",
+    names_pattern = "_(.*)",
+    values_to = "return"
+  ) %>% 
+  add_column(data_type = "return")
+
+returns_long
+```
+
+
+
+We now nest the three dataframes so we have a similar structure to the `constituents` data.
 
 ```{r}
 roc_nested <- roc_long %>% 
@@ -516,14 +546,24 @@ close_nested <- close_long %>%
 close_nested
 ```
 
+```{r}
+returns_nested <- returns_long %>% 
+  nest(returns = c(ticker, return, data_type))
+
+returns_nested
+```
+
+
+
 ### 3.4 Consolidated, Nested Data
 
 Having all three nested dataframes (constituents, prices and rocs) we can consolidate everything into a single dataframe. This will be used to analyze the strategy.
 
 ```{r}
 consolidated_nested <- constituents_nested %>% 
-  left_join(close_nested) %>% 
-  left_join(roc_nested) %>% 
+  left_join(close_nested, by = "date") %>% 
+  left_join(roc_nested, by = "date") %>% 
+  left_join(returns_nested, by = "date") %>% 
   mutate(row_id = row_number()) %>% 
   relocate(row_id, everything())
 
