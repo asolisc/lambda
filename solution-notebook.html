@@ -1721,6 +1721,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#getting-the-data-into-a-long-format">3.3 Getting the data into a ‘long’ format</a></li>
 <li><a href="#consolidated-nested-data">3.4 Consolidated, Nested Data</a></li>
 <li><a href="#stock-selection-per-day">3.5 Stock Selection Per Day</a></li>
+<li><a href="#strategy-implementation-and-output">3.6 Strategy Implementation and Output</a></li>
 </ul></li>
 <li><a href="#strategy-assumptions">4. Strategy Assumptions</a></li>
 </ul>
@@ -2794,11 +2795,11 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </code></pre>
 </div>
 </div>
-<p>Then, we can filter the <code>consolidated_nested</code> dataframe so we have data only for this range of dates.</p>
+<p>Then, we can filter the <code>consolidated_nested</code> dataframe so we have data around this range of dates.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre><code><span class="va">consolidated_nested</span> <span class="op">&lt;-</span> <span class="va">consolidated_nested</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">%&gt;%</span> <span class="fu">between</span><span class="op">(</span><span class="va">start_date</span> <span class="op">-</span> <span class="fl">1</span>, <span class="va">end_date</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">%&gt;%</span> <span class="fu">between</span><span class="op">(</span><span class="va">start_date</span> <span class="op">-</span> <span class="fl">10</span>, <span class="va">end_date</span> <span class="op">+</span> <span class="fl">10</span><span class="op">)</span>
   <span class="op">)</span>
 </code></pre>
 </div>
@@ -2840,14 +2841,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>Here’s the <code>show_top_roc()</code> function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">show_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span>
+<pre><code><span class="va">show_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10L</span><span class="op">)</span> <span class="op">{</span>
   <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">is.numeric</a></span><span class="op">(</span><span class="va">.top_n</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
     <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">&quot;You must provide an integer for the top &#39;n&#39; constituents.&quot;</span><span class="op">)</span>
   <span class="op">}</span>
-  
-  <span class="co"># if (.top_n &gt; nrow(extract_constituents(df, extraction_date))) {</span>
-  <span class="co">#   stop(&quot;You&#39;ve chosen a greater top &#39;n&#39; number than there are constituents. Please lower the number.&quot;)</span>
-  <span class="co"># }</span>
   
   <span class="co"># Get the ID for the previous close</span>
   <span class="va">previous_row</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">%&gt;%</span> 
@@ -2894,7 +2891,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>Now here’s the <code>extract_top_roc()</code> function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">extract_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span>
+<pre><code><span class="va">extract_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10L</span><span class="op">)</span> <span class="op">{</span>
   
   <span class="fu">show_top_roc</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span><span class="op">)</span> <span class="op">%&gt;%</span> 
     <span class="fu">pull</span><span class="op">(</span><span class="va">ticker</span><span class="op">)</span>
@@ -2917,7 +2914,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </ol>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">calculate_weights</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span>
+<pre><code><span class="va">calculate_weights</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10L</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">chosen_tickers</span> <span class="op">&lt;-</span> <span class="fu">extract_top_roc</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span>, <span class="va">.top_n</span><span class="op">)</span>
   
   <span class="va">weights_tbl</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>
@@ -2929,7 +2926,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
       <span class="fl">0</span>                           <span class="co"># if ticker is not chose, assign 0 weight</span>
     <span class="op">)</span>
   <span class="op">)</span> <span class="op">%&gt;%</span> 
-    <span class="fu">arrange</span><span class="op">(</span><span class="op">-</span><span class="va">weights</span><span class="op">)</span>
+    <span class="co"># Focus on stocks that are chosen</span>
+    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">weights</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    
+    <span class="fu">arrange</span><span class="op">(</span><span class="va">tickers</span><span class="op">)</span>
   
   
   <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">weights_tbl</span><span class="op">)</span>
@@ -2937,41 +2937,94 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </code></pre>
 </div>
 </div>
+<p>We also implement the ‘wide’ version of this function:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">calculate_weights_wide</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10L</span><span class="op">)</span> <span class="op">{</span>
+  
+  <span class="va">weights_tbl</span> <span class="op">&lt;-</span> <span class="fu">calculate_weights</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span>, .top_n <span class="op">=</span> <span class="va">.top_n</span><span class="op">)</span>
+  
+  <span class="va">tickers_tbl</span> <span class="op">&lt;-</span> <span class="va">weights_tbl</span> <span class="op">%&gt;%</span>
+    <span class="fu">add_column</span><span class="op">(</span><span class="st">&quot;ticker_id&quot;</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">&quot;ticker_&quot;</span>, <span class="fl">1</span><span class="op">:</span><span class="va">.top_n</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">pivot_wider</span><span class="op">(</span>
+      id_cols <span class="op">=</span> <span class="va">date</span>,
+      names_from <span class="op">=</span> <span class="va">ticker_id</span>,
+      values_from <span class="op">=</span> <span class="va">tickers</span>
+    <span class="op">)</span>
+  
+  <span class="va">weights_tbl</span> <span class="op">&lt;-</span> <span class="va">weights_tbl</span> <span class="op">%&gt;%</span>
+    <span class="fu">add_column</span><span class="op">(</span><span class="st">&quot;weight_id&quot;</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">&quot;weight_&quot;</span>, <span class="fl">1</span><span class="op">:</span><span class="va">.top_n</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+    <span class="fu">pivot_wider</span><span class="op">(</span>
+      id_cols <span class="op">=</span> <span class="va">date</span>,
+      names_from <span class="op">=</span> <span class="va">weight_id</span>,
+      values_from <span class="op">=</span> <span class="va">weights</span>
+    <span class="op">)</span> 
+
+  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="fu">left_join</span><span class="op">(</span><span class="va">tickers_tbl</span>, <span class="va">weights_tbl</span>, by <span class="op">=</span> <span class="st">&quot;date&quot;</span><span class="op">)</span><span class="op">)</span>
+    
+<span class="op">}</span>
+</code></pre>
+</div>
+</div>
 <p>Again, we test the function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="fu">calculate_weights</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span>, .top_n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
+<pre><code><span class="fu">calculate_weights</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span>, .top_n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 </code></pre>
 </div>
-<pre><code># A tibble: 505 x 3
+<pre><code># A tibble: 10 x 3
    date       tickers weights
    &lt;date&gt;     &lt;chr&gt;     &lt;dbl&gt;
- 1 2019-12-31 WU         0.05
- 2 2019-12-31 TGT        0.05
- 3 2019-12-31 SWKS       0.05
- 4 2019-12-31 RMD        0.05
- 5 2019-12-31 QRVO       0.05
- 6 2019-12-31 QCOM       0.05
- 7 2019-12-31 PHM        0.05
- 8 2019-12-31 MLM        0.05
- 9 2019-12-31 MKTX       0.05
-10 2019-12-31 LRCX       0.05
-11 2019-12-31 LDOS       0.05
-12 2019-12-31 KMX        0.05
-13 2019-12-31 KLAC       0.05
-14 2019-12-31 HWM        0.05
-15 2019-12-31 CPRT       0.05
-16 2019-12-31 CDW        0.05
-17 2019-12-31 CAG        0.05
-18 2019-12-31 AMD        0.05
-19 2019-12-31 AMAT       0.05
-20 2019-12-31 AAPL       0.05
-# ... with 485 more rows</code></pre>
+ 1 2019-12-31 AAPL        0.1
+ 2 2019-12-31 AMD         0.1
+ 3 2019-12-31 HWM         0.1
+ 4 2019-12-31 LDOS        0.1
+ 5 2019-12-31 LRCX        0.1
+ 6 2019-12-31 MKTX        0.1
+ 7 2019-12-31 QCOM        0.1
+ 8 2019-12-31 QRVO        0.1
+ 9 2019-12-31 RMD         0.1
+10 2019-12-31 TGT         0.1</code></pre>
 </div>
-<p>This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&amp;P 500 constituents, ranking those by 200-day ROC and equally weighing the top 10.</p>
 <div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="fu">calculate_weights_wide</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span>, .top_n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code># A tibble: 1 x 21
+  date       ticker_1 ticker_2 ticker_3 ticker_4 ticker_5 ticker_6
+  &lt;date&gt;     &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   
+1 2019-12-31 AAPL     AMD      HWM      LDOS     LRCX     MKTX    
+# ... with 14 more variables: ticker_7 &lt;chr&gt;, ticker_8 &lt;chr&gt;,
+#   ticker_9 &lt;chr&gt;, ticker_10 &lt;chr&gt;, weight_1 &lt;dbl&gt;, weight_2 &lt;dbl&gt;,
+#   weight_3 &lt;dbl&gt;, weight_4 &lt;dbl&gt;, weight_5 &lt;dbl&gt;, weight_6 &lt;dbl&gt;,
+#   weight_7 &lt;dbl&gt;, weight_8 &lt;dbl&gt;, weight_9 &lt;dbl&gt;, weight_10 &lt;dbl&gt;</code></pre>
+</div>
+<p>This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&amp;P 500 constituents, ranking those by 200-day ROC and equally weighing the top ‘n’.</p>
+<h3 id="strategy-implementation-and-output">3.6 Strategy Implementation and Output</h3>
+<p>We are finally ready to implement the aforementioned strategy on each day. We proceed by getting a vector of dates for which we want to implement the strategy (defined by the <code>start_date</code> and <code>end_date</code> variables), and then loop over that vector to use it on our <code>calculate_weights()</code> function.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre><code><span class="va">analysis_dates</span> <span class="op">&lt;-</span> <span class="va">consolidated_nested</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">date</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">slice</span><span class="op">(</span><span class="fl">10</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">pull</span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
 
+<span class="va">analysis_dates</span> <span class="op">%&gt;%</span> 
+  <span class="fu">map</span><span class="op">(</span>.f <span class="op">=</span> <span class="op">~</span> <span class="fu">calculate_weights</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="va">.x</span>, .top_n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span>
+</code></pre>
+</div>
+<pre><code>[[1]]
+# A tibble: 10 x 3
+   date       tickers weights
+   &lt;date&gt;     &lt;chr&gt;     &lt;dbl&gt;
+ 1 2010-01-06 CBRE        0.1
+ 2 2010-01-06 FITB        0.1
+ 3 2010-01-06 GNW         0.1
+ 4 2010-01-06 JBL         0.1
+ 5 2010-01-06 MEE         0.1
+ 6 2010-01-06 ODP         0.1
+ 7 2010-01-06 TGNA        0.1
+ 8 2010-01-06 THC         0.1
+ 9 2010-01-06 WYND        0.1
+10 2010-01-06 XL1         0.1</code></pre>
 </div>
 <h1 id="strategy-assumptions">4. Strategy Assumptions</h1>
 <p>The execution of this strategy, as presented on this solution, relies upon the following assumptions:</p>
@@ -3009,7 +3062,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   &lt;date&gt;     &lt;chr&gt;   &lt;dbl&gt;
 1 2010-01-01 AAPL      0.5</code></pre>
 </div>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>

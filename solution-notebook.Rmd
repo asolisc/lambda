@@ -582,11 +582,11 @@ start_date <- ymd("2010-01-01")
 end_date <- ymd("2020-01-01")
 ```
 
-Then, we can filter the `consolidated_nested` dataframe so we have data only for this range of dates.
+Then, we can filter the `consolidated_nested` dataframe so we have data around this range of dates.
 
 ```{r}
 consolidated_nested <- consolidated_nested %>% 
-  filter(date %>% between(start_date - 1, end_date + 1)
+  filter(date %>% between(start_date - 10, end_date + 10)
   )
 ```
 
@@ -626,14 +626,10 @@ For this purpose, we create two functions. We also set as an argument the number
 Here's the `show_top_roc()` function:
 
 ```{r}
-show_top_roc <- function(df, extraction_date, .top_n = 10) {
+show_top_roc <- function(df, extraction_date, .top_n = 10L) {
   if (!is.numeric(.top_n)) {
     stop("You must provide an integer for the top 'n' constituents.")
   }
-  
-  # if (.top_n > nrow(extract_constituents(df, extraction_date))) {
-  #   stop("You've chosen a greater top 'n' number than there are constituents. Please lower the number.")
-  # }
   
   # Get the ID for the previous close
   previous_row <- df %>% 
@@ -666,7 +662,7 @@ Indeed it shows the top 10 ROC tickers for the previous close.
 Now here's the `extract_top_roc()` function:
 
 ```{r}
-extract_top_roc <- function(df, extraction_date, .top_n = 10) {
+extract_top_roc <- function(df, extraction_date, .top_n = 10L) {
   
   show_top_roc(df, extraction_date, .top_n) %>% 
     pull(ticker)
@@ -686,7 +682,7 @@ It works perfectly; we got the exact same tickers as with the `show_top_roc()` f
 3. Get the corresponding weights for each stock. For this step, we create the `calculate_weights()` function:
 
 ```{r}
-calculate_weights <- function(df, .date, .top_n = 10) {
+calculate_weights <- function(df, .date, .top_n = 10L) {
   chosen_tickers <- extract_top_roc(df, .date, .top_n)
   
   weights_tbl <- tibble(
@@ -698,10 +694,41 @@ calculate_weights <- function(df, .date, .top_n = 10) {
       0                           # if ticker is not chose, assign 0 weight
     )
   ) %>% 
-    arrange(-weights)
+    # Focus on stocks that are chosen
+    filter(weights > 0) %>% 
+    
+    arrange(tickers)
   
   
   return(weights_tbl)
+}
+```
+
+We also implement the 'wide' version of this function:
+
+```{r}
+calculate_weights_wide <- function(df, .date, .top_n = 10L) {
+  
+  weights_tbl <- calculate_weights(df, .date, .top_n = .top_n)
+  
+  tickers_tbl <- weights_tbl %>%
+    add_column("ticker_id" = paste0("ticker_", 1:.top_n)) %>% 
+    pivot_wider(
+      id_cols = date,
+      names_from = ticker_id,
+      values_from = tickers
+    )
+  
+  weights_tbl <- weights_tbl %>%
+    add_column("weight_id" = paste0("weight_", 1:.top_n)) %>% 
+    pivot_wider(
+      id_cols = date,
+      names_from = weight_id,
+      values_from = weights
+    ) 
+
+  return(left_join(tickers_tbl, weights_tbl, by = "date"))
+    
 }
 ```
 
@@ -709,14 +736,27 @@ calculate_weights <- function(df, .date, .top_n = 10) {
 Again, we test the function:
 
 ```{r}
-calculate_weights(consolidated_nested, ymd("2019-12-31"), .top_n = 20) %>% 
-  print(n = 20)
+calculate_weights(consolidated_nested, ymd("2019-12-31"), .top_n = 10)
 ```
-
-This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&P 500 constituents, ranking those by 200-day ROC and equally weighing the top 10.
 
 
 ```{r}
+calculate_weights_wide(consolidated_nested, ymd("2019-12-31"), .top_n = 10)
+```
+
+This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&P 500 constituents, ranking those by 200-day ROC and equally weighing the top 'n'.
+
+### 3.6 Strategy Implementation and Output
+
+We are finally ready to implement the aforementioned strategy on each day. We proceed by getting a vector of dates for which we want to implement the strategy (defined by the `start_date` and `end_date` variables), and then loop over that vector to use it on our `calculate_weights()` function.
+
+
+
+```{r}
+analysis_dates <- consolidated_nested %>% select(date) %>% slice(10) %>% pull(date)
+
+analysis_dates %>% 
+  map(.f = ~ calculate_weights(consolidated_nested, .x, .top_n = 10))
 
 ```
 
