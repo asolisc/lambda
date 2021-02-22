@@ -617,16 +617,16 @@ extract_constituents(consolidated_nested, ymd("2019-12-31")) %>%
 
 2. Then, rank each of those constituents by their previous closing 200-day ROC. Choose the top 10 stocks.
 
-For this purpose, we create two functions:
+For this purpose, we create two functions. We also set as an argument the number of stocks that can be picked. In that way, the strategy can be changed to pick the top 'n' stocks.
 
-- the `show_top10_roc()` function, which shows us the top 10 tickers ranked by ROC, for any given date.
+- the `show_top_roc()` function, which shows us the top 10 tickers ranked by ROC, for any given date.
 
-- the `extract_top10_roc()` function, which extracts the top 10 tickers ranked by ROC, for any given date.
+- the `extract_top_roc()` function, which extracts the top 10 tickers ranked by ROC, for any given date.
 
-Here's the `show_top10_roc()` function:
+Here's the `show_top_roc()` function:
 
 ```{r}
-show_top10_roc <- function(df, extraction_date) {
+show_top_roc <- function(df, extraction_date, .top_n) {
   
   # Get the ID for the previous close
   previous_row <- df %>% 
@@ -643,7 +643,7 @@ show_top10_roc <- function(df, extraction_date) {
     filter(ticker %in% extract_constituents(df, extraction_date)) %>% 
     
     # Get the top 10, as ordered by ROC
-    slice_max(order_by = roc, n = 10)
+    slice_max(order_by = roc, n = .top_n)
   
 }
 ```
@@ -651,17 +651,17 @@ show_top10_roc <- function(df, extraction_date) {
 Let's test this function for a given date:
 
 ```{r}
-show_top10_roc(consolidated_nested, ymd("2019-12-31"))
+show_top_roc(consolidated_nested, ymd("2019-12-31"), .top_n = 10)
 ```
 
 Indeed it shows the top 10 ROC tickers for the previous close.
 
-Now here's the `extract_top10_roc()` function:
+Now here's the `extract_top_roc()` function:
 
 ```{r}
-extract_top10_roc <- function(df, extraction_date) {
+extract_top_roc <- function(df, extraction_date, .top_n) {
   
-  show_top10_roc(df, extraction_date) %>% 
+  show_top_roc(df, extraction_date, .top_n) %>% 
     pull(ticker)
 }
 ```
@@ -669,33 +669,49 @@ extract_top10_roc <- function(df, extraction_date) {
 Again, we take it for a spin:
 
 ```{r}
-extract_top10_roc(consolidated_nested, ymd("2019-12-31"))
+extract_top_roc(consolidated_nested, ymd("2019-12-31"), .top_n = 10)
 ```
 
 
-It works perfectly; we got the exact same tickers as with the `show_top10_roc()` function.
+It works perfectly; we got the exact same tickers as with the `show_top_roc()` function.
 
 
-3. Get the corresponding weights for each stock.
+3. Get the corresponding weights for each stock. For this step, we create the `calculate_weights()` function:
 
 ```{r}
-chosen_tickers <- extract_top10_roc(consolidated_nested, ymd("2019-12-31"))
+calculate_weights <- function(df, .date) {
+  chosen_tickers <- extract_top10_roc(df, .date)
+  
+  weights_tbl <- tibble(
+    date = .date,
+    tickers = extract_constituents(df, .date),
+    weights = if_else(
+      tickers %in% chosen_tickers, 
+      1 / length(chosen_tickers), # equally weighted portfolio
+      0                           # if ticker is not chose, assign 0 weight
+    )
+  ) %>% 
+    arrange(-weights)
+  
+  
+  return(weights_tbl)
+}
+```
 
-tibble(
-  date = ymd("2019-12-31"),
-  tickers = extract_constituents(consolidated_nested, ymd("2019-12-31")),
-  weights = if_else(
-    tickers %in% chosen_tickers, 
-    1 / length(chosen_tickers), # equally weighted portfolio
-    0                           # if ticker is not chose, assign 0 weight
-  )
-) %>% 
-  arrange(-weights) %>% 
+
+Again, we test the function:
+
+```{r}
+calculate_weights(consolidated_nested, ymd("2019-12-31")) %>% 
   print(n = 20)
 ```
 
+This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&P 500 constituents, ranking those by 200-day ROC and equally weighing the top 10.
 
 
+```{r}
+
+```
 
 
 
