@@ -833,7 +833,15 @@ strategy_nav <- strategy_returns %>%
 strategy_nav
 ```
 
-Let's finish off with a nice plot of the strategy's NAV:
+Let's write this file to disk:
+
+```{r}
+strategy_nav %>% 
+  write_excel_csv("output/nav.csv")
+```
+
+
+Let's finish off with a nice interactive plot of the strategy's NAV:
 
 ```{r}
 strategy_nav %>% 
@@ -852,22 +860,13 @@ One final step would be to compare these results against holding the whole S&P 5
 
 
 
-# 4. Strategy Assumptions
+# 4. Conclusions
 
 The execution of this strategy, as presented on this solution, relies upon the following assumptions:
 
-1. No trading friction (i.e. there are no commissions and taxes).
+1. No trading friction (i.e. there are no commissions and taxes for buying/selling stocks).
 2. The closing price of the previous day is equal to the opening price of the current day.
 3. The investor can buy fractions of shares.
 
 
 The code can be further improved to 'relax' all of the previous assumptions and reflect a 'more realistic' implementation.
-
-Delivery:
-
-```{r}
-tibble(
-  date = ymd("2010-01-01"),
-  nav = 1e6
-)
-```
