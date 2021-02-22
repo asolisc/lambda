@@ -28,6 +28,7 @@ library(lubridate)
 library(glue)
 library(skimr)
 library(highcharter)
+library(janitor)
 ```
 
 
@@ -37,7 +38,7 @@ In order to run this notebook, you need to have [R](https://cran.r-project.org/)
 
 ```{r, eval=FALSE}
 # NOT RUN
-# install.packages(c("tidyverse", "lubridate", "glue", "skimr", "highcharter"))
+# install.packages(c("tidyverse", "lubridate", "glue", "skimr", "highcharter", "janitor"))
 ```
 
 
@@ -795,7 +796,8 @@ In order to get the time series for the NAV, we now focus on the daily returns o
 We first join the `returns_long` dataframe with the `strategy_weights_long` dataframe.
 
 ```{r}
-weights_n_returns <- strategy_weights_long %>% rename(ticker = tickers) %>% 
+weights_n_returns <- strategy_weights_long %>% 
+  rename(ticker = tickers) %>% 
   left_join(returns_long, by = c("date", "ticker")) %>% 
   select(-data_type)
 
@@ -815,7 +817,9 @@ strategy_returns <- weights_n_returns %>%
   summarise(strategy_return = sum(weighted_return)) %>% 
   
   # get a column with the NAV multiplier.
-  mutate(multiplier = if_else(date == analysis_dates[[1]], 1, strategy_return + 1),
+  mutate(multiplier = if_else(date == analysis_dates[[1]], 
+                              1, 
+                              strategy_return + 1),
          cumulative_multiplier = cumprod(multiplier))
 
 strategy_returns
@@ -855,14 +859,84 @@ strategy_nav %>%
   hc_add_theme(hc_theme_538())
 ```
 
+
+### 3.8 Comparing against the S&P 500 Index
+
 One final step would be to compare these results against holding the whole S&P 500.
 
+We can download daily returns for the S&P 500 from January 02, 1986 through June 29, 2018. The data comes from [this Kaggle webpage](https://www.kaggle.com/pdquant/sp500-daily-19862018).
+
+
+```{r}
+# Import csv file
+spx <- read_csv("data/spx.csv")
+
+
+spx_tbl <- spx %>% 
+  
+  mutate(
+    
+  # Parse the date to a "date" type of object
+    date = parse_date(date, format = "%d-%b-%y"),
+    
+  # Calculate the returns
+  returns = (close / lag(close)) - 1
+  ) %>% 
+  
+  # Filter out the first value
+  filter(!is.na(returns)) %>%
+  
+  # Filter for dates in the analysis
+  filter(date %in% analysis_dates) %>% 
+  
+  # Get lower-case and no-space names
+  clean_names()
+
+spx_tbl
+```
+
+We can create the S&P 500 NAV for the duration of the strategy.
+
+```{r}
+spx_multiplier <- spx_tbl %>% 
+  group_by(date) %>% 
+  
+  # sum the returns for each date
+  summarise(sp500_return = sum(returns)) %>% 
+  
+  # get a column with the NAV multiplier.
+  mutate(multiplier = if_else(date == analysis_dates[[1]], 
+                              1, 
+                              sp500_return + 1),
+         cumulative_multiplier = cumprod(multiplier))
+
+spx_nav <-  spx_multiplier %>% 
+  mutate(nav = starting_capital * cumulative_multiplier) %>% 
+  select(date, sp500_return, nav)
+
+spx_nav
+```
+
+Now let's plot the NAV of holding the S&P 500 index:
+
+
+```{r}
+spx_nav %>% 
+  hchart("line",
+         hcaes(date, nav),
+         # color = "#002C54") %>% 
+         color = "#258039") %>%
+    hc_title(
+    text = "200-day ROC Strategy's Net Asset Value"
+    ) %>% 
+  hc_add_theme(hc_theme_538())
+```
 
 
 
 # 4. Conclusions
 
-The execution of this strategy, as presented on this solution, relies upon the following assumptions:
+This strategy clearly beat the S&P 500 during the analysis period. However, the execution of this strategy, as presented on this document, relies upon some unrealistic assumptions. Namely:
 
 1. No trading friction (i.e. there are no commissions and taxes for buying/selling stocks).
 2. The closing price of the previous day is equal to the opening price of the current day.
