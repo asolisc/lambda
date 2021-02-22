@@ -2832,7 +2832,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <ol start="2" type="1">
 <li>Then, rank each of those constituents by their previous closing 200-day ROC. Choose the top 10 stocks.</li>
 </ol>
-<p>For this purpose, we create two functions. We also set as an argument the number of stocks that can be picked. In that way, the strategy can be changed to pick the top ‘n’ stocks.</p>
+<p>For this purpose, we create two functions. We also set as an argument the number of stocks that can be picked. In that way, the strategy can be changed to pick the top ‘n’ stocks. The default is set to 10.</p>
 <ul>
 <li><p>the <code>show_top_roc()</code> function, which shows us the top 10 tickers ranked by ROC, for any given date.</p></li>
 <li><p>the <code>extract_top_roc()</code> function, which extracts the top 10 tickers ranked by ROC, for any given date.</p></li>
@@ -2840,14 +2840,21 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>Here’s the <code>show_top_roc()</code> function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">show_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span><span class="op">)</span> <span class="op">{</span>
+<pre><code><span class="va">show_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span>
+  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">is.numeric</a></span><span class="op">(</span><span class="va">.top_n</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+    <span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">&quot;You must provide an integer for the top &#39;n&#39; constituents.&quot;</span><span class="op">)</span>
+  <span class="op">}</span>
+  
+  <span class="co"># if (.top_n &gt; nrow(extract_constituents(df, extraction_date))) {</span>
+  <span class="co">#   stop(&quot;You&#39;ve chosen a greater top &#39;n&#39; number than there are constituents. Please lower the number.&quot;)</span>
+  <span class="co"># }</span>
   
   <span class="co"># Get the ID for the previous close</span>
   <span class="va">previous_row</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">%&gt;%</span> 
     <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date</span> <span class="op">==</span> <span class="va">extraction_date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
     <span class="fu">pull</span><span class="op">(</span><span class="va">row_id</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span>
   
-  <span class="co"># Proceed to get the top 10 tickers</span>
+  <span class="co"># Proceed to get the top n tickers</span>
   <span class="va">df</span> <span class="op">%&gt;%</span> 
     <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">row_id</span> <span class="op">==</span> <span class="va">previous_row</span><span class="op">)</span> <span class="op">%&gt;%</span> 
     <span class="fu">select</span><span class="op">(</span><span class="va">row_id</span>, <span class="va">date</span>, <span class="va">rocs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -2856,7 +2863,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     <span class="co"># Filter to focus on the S&amp;P 500 constituents. Use extract_constituents function</span>
     <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">ticker</span> <span class="op">%in%</span> <span class="fu">extract_constituents</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
     
-    <span class="co"># Get the top 10, as ordered by ROC</span>
+    <span class="co"># Get the top n, as ordered by ROC</span>
     <span class="fu">slice_max</span><span class="op">(</span>order_by <span class="op">=</span> <span class="va">roc</span>, n <span class="op">=</span> <span class="va">.top_n</span><span class="op">)</span>
   
 <span class="op">}</span>
@@ -2887,7 +2894,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>Now here’s the <code>extract_top_roc()</code> function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">extract_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span><span class="op">)</span> <span class="op">{</span>
+<pre><code><span class="va">extract_top_roc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span>
   
   <span class="fu">show_top_roc</span><span class="op">(</span><span class="va">df</span>, <span class="va">extraction_date</span>, <span class="va">.top_n</span><span class="op">)</span> <span class="op">%&gt;%</span> 
     <span class="fu">pull</span><span class="op">(</span><span class="va">ticker</span><span class="op">)</span>
@@ -2910,8 +2917,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 </ol>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="va">calculate_weights</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">chosen_tickers</span> <span class="op">&lt;-</span> <span class="fu">extract_top10_roc</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span><span class="op">)</span>
+<pre><code><span class="va">calculate_weights</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span>, <span class="va">.top_n</span> <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span>
+  <span class="va">chosen_tickers</span> <span class="op">&lt;-</span> <span class="fu">extract_top_roc</span><span class="op">(</span><span class="va">df</span>, <span class="va">.date</span>, <span class="va">.top_n</span><span class="op">)</span>
   
   <span class="va">weights_tbl</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>
     date <span class="op">=</span> <span class="va">.date</span>,
@@ -2933,33 +2940,33 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>Again, we test the function:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre><code><span class="fu">calculate_weights</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<pre><code><span class="fu">calculate_weights</span><span class="op">(</span><span class="va">consolidated_nested</span>, <span class="fu">ymd</span><span class="op">(</span><span class="st">&quot;2019-12-31&quot;</span><span class="op">)</span>, .top_n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
 </code></pre>
 </div>
 <pre><code># A tibble: 505 x 3
    date       tickers weights
    &lt;date&gt;     &lt;chr&gt;     &lt;dbl&gt;
- 1 2019-12-31 TGT         0.1
- 2 2019-12-31 RMD         0.1
- 3 2019-12-31 QRVO        0.1
- 4 2019-12-31 QCOM        0.1
- 5 2019-12-31 MKTX        0.1
- 6 2019-12-31 LRCX        0.1
- 7 2019-12-31 LDOS        0.1
- 8 2019-12-31 HWM         0.1
- 9 2019-12-31 AMD         0.1
-10 2019-12-31 AAPL        0.1
-11 2019-12-31 ZTS         0  
-12 2019-12-31 ZION        0  
-13 2019-12-31 ZBRA        0  
-14 2019-12-31 ZBH         0  
-15 2019-12-31 YUM         0  
-16 2019-12-31 XYL         0  
-17 2019-12-31 XRX         0  
-18 2019-12-31 XRAY        0  
-19 2019-12-31 XOM         0  
-20 2019-12-31 XLNX        0  
+ 1 2019-12-31 WU         0.05
+ 2 2019-12-31 TGT        0.05
+ 3 2019-12-31 SWKS       0.05
+ 4 2019-12-31 RMD        0.05
+ 5 2019-12-31 QRVO       0.05
+ 6 2019-12-31 QCOM       0.05
+ 7 2019-12-31 PHM        0.05
+ 8 2019-12-31 MLM        0.05
+ 9 2019-12-31 MKTX       0.05
+10 2019-12-31 LRCX       0.05
+11 2019-12-31 LDOS       0.05
+12 2019-12-31 KMX        0.05
+13 2019-12-31 KLAC       0.05
+14 2019-12-31 HWM        0.05
+15 2019-12-31 CPRT       0.05
+16 2019-12-31 CDW        0.05
+17 2019-12-31 CAG        0.05
+18 2019-12-31 AMD        0.05
+19 2019-12-31 AMAT       0.05
+20 2019-12-31 AAPL       0.05
 # ... with 485 more rows</code></pre>
 </div>
 <p>This is the main function needed for the implementation. At each date, the function tells you what are the weights needed on each of the S&amp;P 500 constituents, ranking those by 200-day ROC and equally weighing the top 10.</p>
